@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -171,7 +172,7 @@ public class DriveSubsystem extends SubsystemBase {
     rot *= DriveConstants.kMaxAngularSpeed;
 
     // Get the target chassis speeds relative to the robot
-    final ChassisSpeeds vel = (fieldRelative ?
+    final ChassisSpeeds targetVel = (fieldRelative ?
       ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, Rotation2d.fromDegrees(m_gyro.getAngle()))
         : new ChassisSpeeds(xSpeed, ySpeed, rot)
     );
@@ -182,17 +183,20 @@ public class DriveSubsystem extends SubsystemBase {
         currentTime = WPIUtilJNI.now() * 1e-6,
         elapsedTime = currentTime - m_prevTime;
 
+      // Side effect: The velocities of targetVel are modified by this function
       SwerveUtils.RateLimitVelocity(
-        vel, m_prevTarget, elapsedTime,
+        targetVel, m_prevTarget, elapsedTime,
         DriveConstants.kMagnitudeSlewRate, DriveConstants.kRotationalSlewRate
       );
 
+      // TODO: the previous times and target velocities are only tracked when rate limit is active. 
+      // This could potentially be a problem if rate limit is false for an extended period of time and then is suddenly switched on.
       m_prevTime = currentTime;
-      m_prevTarget = vel;
+      m_prevTarget = targetVel;
     }
 
     // Use the DriveKinematics to calculate the module states
-    SwerveModuleState[] swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(vel);
+    SwerveModuleState[] swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(targetVel);
 
     // Normalizes the wheel speeds (makes sure none of them go above the max speed)
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
@@ -257,7 +261,9 @@ public class DriveSubsystem extends SubsystemBase {
    * @return the robot's heading in degrees, from -180 to 180
    */
   public double getHeading() {
-    return Rotation2d.fromDegrees(m_gyro.getAngle() * (HeadingConstants.kGyroReversed ? -1.0 : 1.0)).getDegrees();
+    double angle = Rotation2d.fromDegrees(m_gyro.getAngle() * (HeadingConstants.kGyroReversed ? -1.0 : 1.0)).getDegrees();
+    return MathUtil.inputModulus(angle, -180, 180);
+    //return m_odometry.getPoseMeters().getRotation().getDegrees(); //Check if this is already constrained
   }
 
   /**

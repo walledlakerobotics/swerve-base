@@ -15,20 +15,20 @@ public class SwerveUtils {
      */
     public static void RateLimitVelocity(ChassisSpeeds target, ChassisSpeeds previous, double dt, double linear_acc_lim, double rotational_acc_lim) {
         final double
-            dvlim = linear_acc_lim * dt,        // the maximum change in velocity allowed for the given time interval
-            drlim = rotational_acc_lim * dt,
-            dvx = target.vxMetersPerSecond - previous.vxMetersPerSecond,    // the current change in velocity (components)
-            dvy = target.vyMetersPerSecond - previous.vyMetersPerSecond,
-            dvr = target.omegaRadiansPerSecond - previous.omegaRadiansPerSecond,
-            dv = Math.hypot(dvx, dvy),                  // the current change in velocity (vector magnitude)
-            _dv = MathUtil.clamp(dv, -dvlim, dvlim),    // the clamped magnitude
-            _dr = MathUtil.clamp(dvr, -drlim, drlim),
-            scale = dv == 0.0 ? 1.0 : _dv / dv,         // protect against div by 0 when delta velocity was (0, 0)
-            _dvx = dvx * scale,                         // rescale component deltas based on clamped magnitude
-            _dvy = dvy * scale;
-        target.vxMetersPerSecond = previous.vxMetersPerSecond + _dvx;       // reapply clamped changes in velocity
-        target.vyMetersPerSecond = previous.vyMetersPerSecond + _dvy;
-        target.omegaRadiansPerSecond = previous.omegaRadiansPerSecond + _dr;
+            maxVelLim = linear_acc_lim * dt,        // the maximum change in velocity allowed for the given time interval
+            maxRotLim = rotational_acc_lim * dt,
+            deltaVX = target.vxMetersPerSecond - previous.vxMetersPerSecond,    // the current change in velocity (components)
+            deltaVY = target.vyMetersPerSecond - previous.vyMetersPerSecond,
+            deltaRot = target.omegaRadiansPerSecond - previous.omegaRadiansPerSecond,
+            deltaVel = Math.hypot(deltaVX, deltaVY),                  // the current change in velocity (vector magnitude)
+            newDeltaVel = MathUtil.clamp(deltaVel, -maxVelLim, maxVelLim),    // the clamped magnitude
+            newDeltaRot = MathUtil.clamp(deltaRot, -maxRotLim, maxRotLim),
+            scale = deltaVel == 0.0 ? 1.0 : newDeltaVel / deltaVel,         // protect against div by 0 when delta velocity was (0, 0)
+            newDeltaVX = deltaVX * scale,                         // rescale component deltas based on clamped magnitude
+            newDeltaVY = deltaVY * scale;
+        target.vxMetersPerSecond = previous.vxMetersPerSecond + newDeltaVX;       // reapply clamped changes in velocity
+        target.vyMetersPerSecond = previous.vyMetersPerSecond + newDeltaVY;
+        target.omegaRadiansPerSecond = previous.omegaRadiansPerSecond + newDeltaRot;
     }
 
     /**
