@@ -73,18 +73,14 @@ public class RobotGotoAngle extends Command {
 
         double rotation = pidController.calculate(m_driveSubsystem.getHeading());
 
-        if(rotation > HeadingConstants.kHeadingMaxOutput){
-            rotation = HeadingConstants.kHeadingMaxOutput;
-        }
-        else if(rotation < HeadingConstants.kHeadingMinOutput){
-            rotation = HeadingConstants.kHeadingMinOutput;
-        }
+        rotation = MathUtil.clamp(rotation, HeadingConstants.kHeadingMinOutput, HeadingConstants.kHeadingMaxOutput);
 
         m_driveSubsystem.drive(
             -MathUtil.applyDeadband(m_xSpeed.getAsDouble(), OIConstants.kDriveDeadband),
             -MathUtil.applyDeadband(m_ySpeed.getAsDouble(), OIConstants.kDriveDeadband),
             rotation,
-            true, true);
+            true, true
+        );
         
         if(pidController.atSetpoint()){
             m_complete = true;

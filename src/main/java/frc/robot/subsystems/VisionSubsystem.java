@@ -33,11 +33,11 @@ public class VisionSubsystem extends SubsystemBase {
     //ta = target area 0% to 100%
     
     public void setPipeline(int pipeline){
-        NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").setInteger(pipeline);
+        NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").setNumber(pipeline);
     }
 
     public int getPipeline(){
-        return (int)NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").getInteger(-1);
+        return ((Double)NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").getNumber(-1)).intValue();
     }
 
     /**
@@ -62,7 +62,7 @@ public class VisionSubsystem extends SubsystemBase {
      * Returns the number of valid targets detected by the limelight. Returns 0 if no targets are found.
      */
     public int getTV(){
-        return (int)tv.getInteger(0);
+        return (int)tv.getDouble(0);
     }
 
     /**
