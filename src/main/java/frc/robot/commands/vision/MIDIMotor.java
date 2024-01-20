@@ -1,41 +1,60 @@
 package frc.robot.commands.vision;
+import java.util.Timer;
 
 import frc.robot.subsystems.DriveSubsystem;
+//json imports
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import java.io.FileReader;
+import java.io.IOException;
 
 //Import subsystem(s) this command interacts with below
 
 import frc.robot.subsystems.VisionSubsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import java.nio.file.Path;
+
+import javax.sound.midi.*;
+
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import edu.wpi.first.wpilibj.SerialPort;
+
 import edu.wpi.first.math.controller.PIDController;
 
-import frc.robot.Constants.VisionConstants;
+import edu.wpi.first.wpilibj.Filesystem;
+
+
+
+
 
 //Import this so you can make this class a command
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class AutoAlignCircle extends Command {
+public class MIDIMotor extends Command {
 
     //Import any instance variables that are passed into the file below here, such as the subsystem(s) your command interacts with.
-    final VisionSubsystem m_visionSubsystem;
     final DriveSubsystem m_driveSubsystem;
-    final PIDController distanceController = new PIDController(.7, 0, 0.1);
-
-    boolean isAlignDistacne = false;
-    boolean isAlignRotation = false;
-
+    final PIDController distanceController = new PIDController(.2, 0, 0.05);
 
     //If you want to contoll whether or not the command has ended, you should store it in some sort of variable:
     private boolean m_complete = false;
+    private static final int MOTOR_CAN_ID = 1; // Replace with your actual CAN ID
+    private static final double MAX_SPEED = 1.0; // Maximum motor speed
+    
 
+    private CANSparkMax motor;
     //Class Constructor
-    public AutoAlignCircle(VisionSubsystem visionSubsystem, DriveSubsystem driveSubsystem){
+    public MIDIMotor(VisionSubsystem visionSubsystem, DriveSubsystem driveSubsystem){
         m_driveSubsystem = driveSubsystem;
-        m_visionSubsystem = visionSubsystem;
-        
+        motor = new CANSparkMax(MOTOR_CAN_ID, MotorType.kBrushless);
         //If your command interacts with any subsystem(s), you should pass them into "addRequirements()"
         //This function makes it so your command will only run once these subsystem(s) are free from other commands.
         //This is really important as it will stop scenarios where two commands try to controll a motor at the same time.
-        addRequirements(m_visionSubsystem);
+
     }
 
 
@@ -48,52 +67,39 @@ public class AutoAlignCircle extends Command {
      * called a second time.
      */
     //When not overridden, this function is blank.
+    String trajectoryJSON = "src/main/deploy/midi/grouped_notes_with_speed.json";
     @Override
     public void initialize(){
         //m_chassisSubsystem.setBrakeMode();
-
-        m_visionSubsystem.setPipeline(3);
-
         m_complete = false;
+        long currentTimeMillis = System.currentTimeMillis();
     }
-
     /*This function is called repeatedly when the schedueler's "run()" function is called.
      * Once you want the function to end, you should set m_complete to true.
      */
     @Override
-    public void execute() {
-        double x = m_visionSubsystem.getX();
-        double y = m_visionSubsystem.getY();
-        double targets = m_visionSubsystem.getTV();
-        double rotate = 0;
-        double orbitSpeed = 0.2; // Adjust this value to control the orbit speed
-        double distanceFromTarget = m_visionSubsystem.getReflectiveTapeDistance();
+    public void execute(){
+        // Path to the JSON file
+        String filePath = "src/main/deploy/midi/grouped_notes_with_speed.json";
+        try {
+            // Parse the JSON file
+            JSONParser parser = new JSONParser();
+            JSONArray jsonArray = (JSONArray) parser.parse(new FileReader(filePath));
 
-        if (targets > 0) {
-            if (x > VisionConstants.kRotationTolerance){
-                rotate = VisionConstants.kRotationSpeed;//.6
+            // Iterate through the array and print values
+            //create something to track the ammount of time passed, and then when the note is at the certain time, run the motor until the note is no longer at that time
+            for (Object arrayElement : jsonArray) {
+                JSONObject jsonObject = (JSONObject) arrayElement;
+                System.out.println("Note: " + jsonObject.get("Note") + ", Speed: " + jsonObject.get("Speed"));
+                //motor.set(MAX_SPEED);
             }
-            else if (x < -VisionConstants.kRotationTolerance){
-                rotate = -VisionConstants.kRotationSpeed;
-            }
-
-            double forwardSpeed = distanceController.calculate(distanceFromTarget);
-
-            // Drive the robot with orbit control
-            m_driveSubsystem.drive(
-                forwardSpeed*.2, 
-                orbitSpeed, 
-                rotate, 
-                true, 
-                true);
-
-        } else {
-            // No targets, stop the robot
-            m_driveSubsystem.drive(0, 0, 0, false, true);
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
         }
-    }
-
     
+    
+        
+    }
 
     /*This function is called once when the command ends.
      * A command ends either when you tell it to end with the "isFinished()" function below, or when it is interupted.

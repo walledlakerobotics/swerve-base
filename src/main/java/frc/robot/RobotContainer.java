@@ -4,11 +4,13 @@
 
 package frc.robot;
 
-// import com.pathplanner.lib.auto.NamedCommands;
-// import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -48,13 +50,12 @@ public class RobotContainer {
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
-  public RobotContainer() 
-  {
+  public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
 
+    // Configure limelight default pipeline
     m_visionSubsystem.setDefaultCommand(new DefaultLimelightPipeline(m_visionSubsystem));
-
 
     // Configure default commands
     m_robotDrive.setDefaultCommand(
@@ -76,7 +77,7 @@ public class RobotContainer {
             m_robotDrive));
     
     // This lets pathplanner identify our commands
-   // NamedCommands.registerCommand("Auto Align", new AutoAlignBottom(m_visionSubsystem, m_robotDrive));
+    // NamedCommands.registerCommand("Auto Align", new AutoAlignBottom(m_visionSubsystem, m_robotDrive));
 
     m_autonChooser.setDefaultOption("Template Auton", new TemplateAuton(m_robotDrive));
     //m_autonChooser.addOption("Path Planner", new PathPlannerAuto("Example Auton"));
@@ -85,6 +86,8 @@ public class RobotContainer {
     Shuffleboard.getTab("Autonomous").add(m_autonChooser).withSize(2, 1)
       .withProperties(Map.of("Title", "Auton Command"));
 
+    // DEBUG: shuffleboard widget for resetting pose. For now I'm using a default pose of 0, 0 and a rotation of 0
+    Shuffleboard.getTab("Swerve").add("reset pose", new InstantCommand(this::resetPose)).withSize(2, 1);
   }
 
   /**
@@ -111,7 +114,7 @@ public class RobotContainer {
             m_robotDrive));
     
     //Y button: auto aim (high pole) (i set it to be on a button press, not held)
-    new JoystickButton(m_driverController, Button.kX.value)
+    new JoystickButton(m_driverController, Button.kY.value)
         .toggleOnTrue(
             new AutoAlignCircle(m_visionSubsystem, m_robotDrive)
         );
@@ -126,7 +129,7 @@ public class RobotContainer {
     //           () -> m_driverController.getLeftX()
     //         )
     //     );
-        new JoystickButton(m_driverController, Button.kA.value)
+    new JoystickButton(m_driverController, Button.kA.value)
         .onTrue(
             new RobotGotoAngle(
               m_robotDrive,
@@ -141,6 +144,12 @@ public class RobotContainer {
         .onTrue(new InstantCommand(
             () -> m_robotDrive.setHeading(90),
             m_robotDrive));
+  }
+
+  public void resetPose(){
+    m_robotDrive.resetOdometry(
+        new Pose2d(0, 0, new Rotation2d(0))
+    );
   }
 
   /**

@@ -6,29 +6,32 @@ import frc.robot.subsystems.DriveSubsystem;
 
 import frc.robot.subsystems.VisionSubsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.math.controller.PIDController;
 
+import com.kauailabs.navx.frc.AHRS;
+
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.SPI;
 import frc.robot.Constants.VisionConstants;
 
 //Import this so you can make this class a command
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class AutoAlignCircle extends Command {
+public class AutoAlignAutoAim extends Command {
 
     //Import any instance variables that are passed into the file below here, such as the subsystem(s) your command interacts with.
     final VisionSubsystem m_visionSubsystem;
     final DriveSubsystem m_driveSubsystem;
-    final PIDController distanceController = new PIDController(.7, 0, 0.1);
+    final PIDController distanceController = new PIDController(.2, 0, 0.05);
 
     boolean isAlignDistacne = false;
     boolean isAlignRotation = false;
-
+    private final AHRS m_gyro = new AHRS(SPI.Port.kMXP);
 
     //If you want to contoll whether or not the command has ended, you should store it in some sort of variable:
     private boolean m_complete = false;
 
     //Class Constructor
-    public AutoAlignCircle(VisionSubsystem visionSubsystem, DriveSubsystem driveSubsystem){
+    public AutoAlignAutoAim(VisionSubsystem visionSubsystem, DriveSubsystem driveSubsystem){
         m_driveSubsystem = driveSubsystem;
         m_visionSubsystem = visionSubsystem;
         
@@ -51,9 +54,7 @@ public class AutoAlignCircle extends Command {
     @Override
     public void initialize(){
         //m_chassisSubsystem.setBrakeMode();
-
-        m_visionSubsystem.setPipeline(3);
-
+        m_visionSubsystem.setPipeline(VisionConstants.kReflectiveTapePipeline);
         m_complete = false;
     }
 
@@ -61,39 +62,75 @@ public class AutoAlignCircle extends Command {
      * Once you want the function to end, you should set m_complete to true.
      */
     @Override
-    public void execute() {
-        double x = m_visionSubsystem.getX();
+    public void execute(){
         double y = m_visionSubsystem.getY();
+        double x = m_visionSubsystem.getX();
         double targets = m_visionSubsystem.getTV();
+        double forwardSpeed = 0;
         double rotate = 0;
-        double orbitSpeed = 0.2; // Adjust this value to control the orbit speed
-        double distanceFromTarget = m_visionSubsystem.getReflectiveTapeDistance();
+        double angle = m_gyro.getAngle(); 
+        double crabCrawl = 0;
+        //SmartDashboard.putNumber("motor speed align targets", x);
 
-        if (targets > 0) {
-            if (x > VisionConstants.kRotationTolerance){
+        if ((targets == 0) || (y > 0)){
+            rotate = 0;
+            forwardSpeed = 0;
+            //m_ledSubsystem.changeLEDState(LEDState.RED);
+        }
+
+        else{
+            //this returns how fast the robot shoud move in order to get to middle
+            if (Math.abs(angle) > .1){
+                double normalizedAngle = (angle + 180) % 360 - 180;
+                crabCrawl = (normalizedAngle / 180);
+            }
+
+            //Rotate so target is in center
+            if (x+1 > VisionConstants.kRotationTolerance){
                 rotate = VisionConstants.kRotationSpeed;//.6
             }
-            else if (x < -VisionConstants.kRotationTolerance){
+            else if (x+1 < -VisionConstants.kRotationTolerance){
                 rotate = -VisionConstants.kRotationSpeed;
             }
 
-            double forwardSpeed = distanceController.calculate(distanceFromTarget);
+            //Move forwards/backwards
+            double distanceFromTarget = m_visionSubsystem.getReflectiveTapeDistance();
 
-            // Drive the robot with orbit control
-            m_driveSubsystem.drive(
-                forwardSpeed*.2, 
-                orbitSpeed, 
-                rotate, 
-                true, 
-                true);
+            //P controller for distance (fred)
+            //forwardSpeed = (currentPosition - desiredPosition) * Pconstant
+            if ((distanceFromTarget < VisionConstants.kTopPoleDesiredDistance - VisionConstants.kDistanceTolerance) 
+            || (distanceFromTarget > VisionConstants.kTopPoleDesiredDistance + VisionConstants.kDistanceTolerance)){
+                forwardSpeed = (m_visionSubsystem.getReflectiveTapeDistance() - VisionConstants.kTopPoleDesiredDistance) * VisionConstants.kForwardSpeedPConstant;
+            }
+            else{
+                forwardSpeed = 0;
+            }
 
-        } else {
-            // No targets, stop the robot
-            m_driveSubsystem.drive(0, 0, 0, false, true);
+            //Change LED state
+            if((distanceFromTarget > 39) && (distanceFromTarget < 41)){
+                isAlignDistacne = true;
+            }
+            else{
+                isAlignDistacne = false;
+            }
+            if ((x+1 < VisionConstants.kRotationTolerance)&&(x+1 > -VisionConstants.kRotationTolerance)){
+                isAlignRotation = true;
+            }
+            else{
+                isAlignRotation = false;
+            }
         }
-    }
+        //PID
+        forwardSpeed = distanceController.calculate(forwardSpeed);
+        crabCrawl = distanceController.calculate(crabCrawl);
+        SmartDashboard.putNumber("motor speed align forwardspeed", forwardSpeed);
+        SmartDashboard.putNumber("motor speed align rotation", rotate);
 
+        m_driveSubsystem.drive(forwardSpeed*.2, crabCrawl*.2, rotate*.2, false, true);
+  
     
+        
+    }
 
     /*This function is called once when the command ends.
      * A command ends either when you tell it to end with the "isFinished()" function below, or when it is interupted.

@@ -30,9 +30,8 @@ public final class Constants {
     public static final double kMaxSpeedMetersPerSecond = 5;
     public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
 
-    public static final double kDirectionSlewRate = 1.2; // radians per second
-    public static final double kMagnitudeSlewRate = 1.8; // percent per second (1 = 100%)
-    public static final double kRotationalSlewRate = 2.0; // percent per second (1 = 100%)
+    public static final double kMagnitudeSlewRate = 1.8 * kMaxSpeedMetersPerSecond; // meters per second^2
+    public static final double kRotationalSlewRate = 2.0 * kMaxAngularSpeed;        // radians per second^2
 
     // Chassis configuration
     public static final double kTrackWidth = Units.inchesToMeters(21);
@@ -99,7 +98,7 @@ public final class Constants {
     public static final double kDrivingP = 0.04;
     public static final double kDrivingI = 0;
     public static final double kDrivingD = 0;
-    //TODO: IMPORTANT: I don't know why there is a feedforward on the drive motors, but we need to figure out why and if it also applies to our robot.
+    //TODO: We need to figure out how feedforwards work and how to use them.
     public static final double kDrivingFF = 1 / kDriveWheelFreeSpeedRps; 
     public static final double kDrivingMinOutput = -1;
     public static final double kDrivingMaxOutput = 1;
@@ -120,7 +119,7 @@ public final class Constants {
     public static final IdleMode kDrivingMotorIdleMode = IdleMode.kBrake;
     public static final IdleMode kTurningMotorIdleMode = IdleMode.kBrake;
 
-    //TODO: Make sure the current limits aren't too high
+    //TODO: probably not super important, but we should look into how to properly calculate current limits.
     public static final int kDrivingMotorCurrentLimit = 40; // amps
     public static final int kTurningMotorCurrentLimit = 20; // amps
   }
@@ -164,26 +163,26 @@ public final class Constants {
   public static final class VisionConstants {
 
     //How many degrees is your limelight rotated from perfectly vertical
-    public static final double kLimelightMountAngle = 4; //NOTE: we should really take into account the rotation of the robot using the pitch of the NavX - Noah
+    public static final double kLimelightMountAngle = 0; //NOTE: we should really take into account the rotation of the robot using the pitch of the NavX - Noah
 
     //Limelight lens height from floor in inches
-    public static final double kLimelightLensHeight = 28.5;
+    public static final double kLimelightLensHeight = 20;
 
     //Height of reflective tape poles in inches
-    public static final double kTopReflectiveTapeHeight = 43.5;
+    public static final double kTopReflectiveTapeHeight = 24;
     public static final double kBottomReflectiveTapeHeight = 24;
 
-    public static final double kTopPoleDesiredDistance = 51;
+    public static final double kTopPoleDesiredDistance = 24;
     public static final double kDistanceTolerance = 2;
     public static final double kMaxForwardSpeed = 0.7;
     public static final double kForwardSpeedPConstant = 0.1;
 
-    public static final double kRotationSpeed = 0.6;
+    public static final double kRotationSpeed = 0.2;
     public static final double kRotationTolerance = 2;
 
     //Pipeline constants
     public static final int kAprilTagPipeline = 0;
-    public static final int kReflectiveTapePipeline = 1;
+    public static final int kReflectiveTapePipeline = 3;
     public static final int kGamePiecePipeline = 2;
 
     /* NOTE: the limelight starts with pipeline 0 by default, so we need to make sure we make that pipeline something 
