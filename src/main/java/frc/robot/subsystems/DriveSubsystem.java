@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -92,6 +93,9 @@ public class DriveSubsystem extends SubsystemBase {
     Shuffleboard.getTab("Swerve").addDouble("rearRight angle", () -> SwerveUtils.angleConstrain(m_rearRight.getPosition().angle.getDegrees()));
     Shuffleboard.getTab("Swerve").add("Field", m_field);
     
+    Shuffleboard.getTab("Swerve").addDouble("robot X", () -> getPose().getX());
+    Shuffleboard.getTab("Swerve").addDouble("robot Y", () -> getPose().getY());
+    
     // Configure the AutoBuilder
     AutoBuilder.configureHolonomic(
         this::getPose, // Robot pose supplier
@@ -171,7 +175,7 @@ public class DriveSubsystem extends SubsystemBase {
     rot *= DriveConstants.kMaxAngularSpeed;
 
     // Get the target chassis speeds relative to the robot
-    final ChassisSpeeds vel = (fieldRelative ?
+    final ChassisSpeeds targetVel = (fieldRelative ?
       ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, Rotation2d.fromDegrees(m_gyro.getAngle()))
         : new ChassisSpeeds(xSpeed, ySpeed, rot)
     );
@@ -182,17 +186,20 @@ public class DriveSubsystem extends SubsystemBase {
         currentTime = WPIUtilJNI.now() * 1e-6,
         elapsedTime = currentTime - m_prevTime;
 
+      // Side effect: The velocities of targetVel are modified by this function
       SwerveUtils.RateLimitVelocity(
-        vel, m_prevTarget, elapsedTime,
+        targetVel, m_prevTarget, elapsedTime,
         DriveConstants.kMagnitudeSlewRate, DriveConstants.kRotationalSlewRate
       );
 
+      // TODO: the previous times and target velocities are only tracked when rate limit is active. 
+      // This could potentially be a problem if rate limit is false for an extended period of time and then is suddenly switched on.
       m_prevTime = currentTime;
-      m_prevTarget = vel;
+      m_prevTarget = targetVel;
     }
 
     // Use the DriveKinematics to calculate the module states
-    SwerveModuleState[] swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(vel);
+    SwerveModuleState[] swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(targetVel);
 
     // Normalizes the wheel speeds (makes sure none of them go above the max speed)
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
@@ -244,11 +251,21 @@ public class DriveSubsystem extends SubsystemBase {
   /**
    * Sets the robot's heading to a specific angle.
    * 
-   * @param angle The angle to set the robot's heading to.
+   * @param angle The angle (in degrees) to set the robot's heading to.
    */
   public void setHeading(double angle) {
     //The angle adjustment may not be cleared by m_gyro.reset(). Double check in testing
-    m_gyro.setAngleAdjustment((angle-getHeading()) * (HeadingConstants.kGyroReversed ? -1.0 : 1.0));
+    //m_gyro.setAngleAdjustment((angle-getHeading()) * (HeadingConstants.kGyroReversed ? -1.0 : 1.0));
+    m_odometry.resetPosition(
+      new Rotation2d(Math.toRadians(angle)), 
+      new SwerveModulePosition[] {
+        m_frontLeft.getPosition(),
+        m_frontRight.getPosition(),
+        m_rearLeft.getPosition(),
+        m_rearRight.getPosition()
+      }, 
+      getPose()
+    );
   }
 
   /**
@@ -257,7 +274,9 @@ public class DriveSubsystem extends SubsystemBase {
    * @return the robot's heading in degrees, from -180 to 180
    */
   public double getHeading() {
-    return Rotation2d.fromDegrees(m_gyro.getAngle() * (HeadingConstants.kGyroReversed ? -1.0 : 1.0)).getDegrees();
+    //double angle = Rotation2d.fromDegrees(m_gyro.getAngle() * (HeadingConstants.kGyroReversed ? -1.0 : 1.0)).getDegrees();
+    //return MathUtil.inputModulus(angle, -180, 180);
+    return m_odometry.getPoseMeters().getRotation().getDegrees(); //Check if this is already constrained
   }
 
   /**
@@ -286,8 +305,8 @@ public class DriveSubsystem extends SubsystemBase {
    */
   private void driveRobotRelative(ChassisSpeeds speeds){
     // This takes the velocities and converts them into precentages (-1 to 1)
-    drive(speeds.vxMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond, 
-          speeds.vyMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond, 
+    drive((speeds.vxMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond)*0.2, 
+          (speeds.vyMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond)*0.2, 
           speeds.omegaRadiansPerSecond / DriveConstants.kMaxAngularSpeed, 
           false, 
           false);

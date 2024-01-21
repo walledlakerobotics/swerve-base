@@ -42,8 +42,8 @@ public class RobotContainer {
   private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
 
   // The driver's controller
-  final Joystick m_driverController = new Joystick(OIConstants.kDriverControllerPort);
-  //final XboxController m_drivController = new XboxController(OIConstants.kDriverControllerPort);
+  // final Joystick m_driverController = new Joystick(OIConstants.kDriverControllerPort);
+  final XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
 
   SendableChooser<Command> m_autonChooser = new SendableChooser<>();
 
@@ -61,26 +61,26 @@ public class RobotContainer {
     m_robotDrive.setDefaultCommand(
         // The left stick controls translation of the robot.
         // Turning is controlled by the X axis of the right stick.
-        // new RunCommand(
-        //     () -> m_robotDrive.drive(
-        //         -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband),
-        //         -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
-        //         -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
-        //         true, true),
-        //     m_robotDrive));
         new RunCommand(
             () -> m_robotDrive.drive(
-                -MathUtil.applyDeadband(m_driverController.getX(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(m_driverController.getY(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(m_driverController.getTwist(), OIConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
                 true, true),
             m_robotDrive));
+        // new RunCommand(
+        //     () -> m_robotDrive.drive(
+        //         -MathUtil.applyDeadband(m_driverController.getY(), OIConstants.kDriveDeadband),
+        //         -MathUtil.applyDeadband(m_driverController.getX(), OIConstants.kDriveDeadband),
+        //         -MathUtil.applyDeadband(m_driverController.getTwist(), OIConstants.kDriveDeadband),
+        //         true, true),
+        //     m_robotDrive));
     
     // This lets pathplanner identify our commands
-    // NamedCommands.registerCommand("Auto Align", new AutoAlignBottom(m_visionSubsystem, m_robotDrive));
+    NamedCommands.registerCommand("Auto Align", new AutoAlignBottom(m_visionSubsystem, m_robotDrive));
 
     m_autonChooser.setDefaultOption("Template Auton", new TemplateAuton(m_robotDrive));
-    //m_autonChooser.addOption("Path Planner", new PathPlannerAuto("Example Auton"));
+    m_autonChooser.addOption("Path Planner", new PathPlannerAuto("Example Auton"));
 
     // Put chooser on the dashboard
     Shuffleboard.getTab("Autonomous").add(m_autonChooser).withSize(2, 1)
@@ -120,24 +120,24 @@ public class RobotContainer {
         );
     
     //A button: makes robot face 0 degrees
-    // new JoystickButton(m_driverController, Button.kA.value)
-    //     .onTrue(
-    //         new RobotGotoAngle(
-    //           m_robotDrive,
-    //           0,
-    //           () -> m_driverController.getLeftY(),
-    //           () -> m_driverController.getLeftX()
-    //         )
-    //     );
     new JoystickButton(m_driverController, Button.kA.value)
         .onTrue(
             new RobotGotoAngle(
               m_robotDrive,
               0,
-              () -> m_driverController.getY(),
-              () -> m_driverController.getX()
+              () -> m_driverController.getLeftY(),
+              () -> m_driverController.getLeftX()
             )
         );
+    // new JoystickButton(m_driverController, Button.kA.value)
+    //     .toggleOnTrue(
+    //         new RobotGotoAngle(
+    //           m_robotDrive,
+    //           0,
+    //           () -> m_driverController.getY(),
+    //           () -> m_driverController.getX()
+    //         )
+    //     );
     
     //B button: sets gyro to 90 degrees
     new JoystickButton(m_driverController, Button.kB.value)
