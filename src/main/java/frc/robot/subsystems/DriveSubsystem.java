@@ -251,11 +251,21 @@ public class DriveSubsystem extends SubsystemBase {
   /**
    * Sets the robot's heading to a specific angle.
    * 
-   * @param angle The angle to set the robot's heading to.
+   * @param angle The angle (in degrees) to set the robot's heading to.
    */
   public void setHeading(double angle) {
     //The angle adjustment may not be cleared by m_gyro.reset(). Double check in testing
-    m_gyro.setAngleAdjustment((angle-getHeading()) * (HeadingConstants.kGyroReversed ? -1.0 : 1.0));
+    //m_gyro.setAngleAdjustment((angle-getHeading()) * (HeadingConstants.kGyroReversed ? -1.0 : 1.0));
+    m_odometry.resetPosition(
+      new Rotation2d(Math.toRadians(angle)), 
+      new SwerveModulePosition[] {
+        m_frontLeft.getPosition(),
+        m_frontRight.getPosition(),
+        m_rearLeft.getPosition(),
+        m_rearRight.getPosition()
+      }, 
+      getPose()
+    );
   }
 
   /**
@@ -264,9 +274,9 @@ public class DriveSubsystem extends SubsystemBase {
    * @return the robot's heading in degrees, from -180 to 180
    */
   public double getHeading() {
-    double angle = Rotation2d.fromDegrees(m_gyro.getAngle() * (HeadingConstants.kGyroReversed ? -1.0 : 1.0)).getDegrees();
-    return MathUtil.inputModulus(angle, -180, 180);
-    //return m_odometry.getPoseMeters().getRotation().getDegrees(); //Check if this is already constrained
+    //double angle = Rotation2d.fromDegrees(m_gyro.getAngle() * (HeadingConstants.kGyroReversed ? -1.0 : 1.0)).getDegrees();
+    //return MathUtil.inputModulus(angle, -180, 180);
+    return m_odometry.getPoseMeters().getRotation().getDegrees(); //Check if this is already constrained
   }
 
   /**
