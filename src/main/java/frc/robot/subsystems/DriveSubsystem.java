@@ -93,6 +93,9 @@ public class DriveSubsystem extends SubsystemBase {
     Shuffleboard.getTab("Swerve").addDouble("rearRight angle", () -> SwerveUtils.angleConstrain(m_rearRight.getPosition().angle.getDegrees()));
     Shuffleboard.getTab("Swerve").add("Field", m_field);
     
+    Shuffleboard.getTab("Swerve").addDouble("robot X", () -> getPose().getX());
+    Shuffleboard.getTab("Swerve").addDouble("robot Y", () -> getPose().getY());
+    
     // Configure the AutoBuilder
     AutoBuilder.configureHolonomic(
         this::getPose, // Robot pose supplier
