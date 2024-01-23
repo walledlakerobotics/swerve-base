@@ -2,29 +2,37 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 public class VisionSubsystem extends SubsystemBase {
-    final public NetworkTableEntry ty;
-    final public NetworkTableEntry tx; 
-    //final public NetworkTableEntry tl;
-    final public NetworkTableEntry tv;
+    final private NetworkTableEntry ty;
+    final private NetworkTableEntry tx; 
+    //final private NetworkTableEntry tl;
+    final private NetworkTableEntry tv;
+    final private NetworkTable limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
+
+    //Field for april tag detection
+    private final Field2d m_field = new Field2d();
+    
 
     public VisionSubsystem(){
-        //TODO: maybe this should be an instance variable?
-        final NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-        ty = table.getEntry("ty");
-        tx = table.getEntry("tx");
+        ty = limelightTable.getEntry("ty");
+        tx = limelightTable.getEntry("tx");
         //TODO: what is tl and why is it not configured properly?
-        //tl = table.getEntry("ty");
-        tv = table.getEntry("tv");
+        //tl = limelightTable.getEntry("ty");
+        tv = limelightTable.getEntry("tv");
+
         setPipeline(VisionConstants.kDefaultPipeline);
 
         Shuffleboard.getTab("Vision").addInteger("Pipeline", () -> getPipeline());
         Shuffleboard.getTab("Vision").addDouble("Distance", () -> getReflectiveTapeDistance());
+        Shuffleboard.getTab("Vision").add(m_field);
     }
 
     //tv = valid targets
@@ -33,11 +41,11 @@ public class VisionSubsystem extends SubsystemBase {
     //ta = target area 0% to 100%
     
     public void setPipeline(int pipeline){
-        NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").setNumber(pipeline);
+        limelightTable.getEntry("pipeline").setNumber(pipeline);
     }
 
     public int getPipeline(){
-        return ((Double)NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").getNumber(-1)).intValue();
+        return ((Double)limelightTable.getEntry("pipeline").getNumber(-1)).intValue();
     }
 
     /**
@@ -93,8 +101,28 @@ public class VisionSubsystem extends SubsystemBase {
         return (goalHeightInches - VisionConstants.kLimelightLensHeight) / Math.tan(angleToGoalRadians);
     }
 
+    /**
+     * Uses whatever april tag is in front of it to estimate the robot's position on the field. 
+     * Returns null if no april tag is in view.
+     * @return The position of the robot, or null.
+     */
+    public Pose2d getRobotPosition(){
+        
+        if(getPipeline() == VisionConstants.kAprilTagPipeline) {
+            /* Notes for Gabe: a Pose2d object contains a robot's x position, y position, 
+             * and rotation. I need your help with taking the limelight values from network tables 
+             * and converting them to a robot pose object. Once you do that I'll figure out how
+             * to use this object for correcting the odometry.
+             */
+            //TODO: implement this function
+            return new Pose2d(0, 0, new Rotation2d(0));
+        }
+        return null;
+    }
+
 
     @Override
     public void periodic(){
+        m_field.setRobotPose(getRobotPosition());
     }
 }

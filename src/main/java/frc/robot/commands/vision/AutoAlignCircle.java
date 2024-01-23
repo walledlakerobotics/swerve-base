@@ -5,7 +5,6 @@ import frc.robot.subsystems.DriveSubsystem;
 //Import subsystem(s) this command interacts with below
 
 import frc.robot.subsystems.VisionSubsystem;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.controller.PIDController;
 
 import frc.robot.Constants.VisionConstants;
