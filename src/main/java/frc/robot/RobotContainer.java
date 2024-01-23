@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.auton.TemplateAuton;
 import frc.robot.commands.drive.RobotGotoAngle;
-import frc.robot.commands.vision.AutoAlignBottom;
+import frc.robot.commands.vision.AutoAlignAutoAim;
 import frc.robot.commands.vision.AutoAlignCircle;
 import frc.robot.commands.vision.DefaultLimelightPipeline;
 import frc.robot.subsystems.DriveSubsystem;
@@ -76,9 +76,11 @@ public class RobotContainer {
         //         true, true),
         //     m_robotDrive));
     
-    // This lets pathplanner identify our commands
-    NamedCommands.registerCommand("Auto Align", new AutoAlignBottom(m_visionSubsystem, m_robotDrive));
+    // "registerCommand" lets pathplanner identify our commands
+    // Here's the autoalign as an example:
+    NamedCommands.registerCommand("Auto Align", new AutoAlignAutoAim(m_visionSubsystem, m_robotDrive));
 
+    //Adding options to the sendable chooser
     m_autonChooser.setDefaultOption("Template Auton", new TemplateAuton(m_robotDrive));
     m_autonChooser.addOption("Path Planner", new PathPlannerAuto("Example Auton"));
 
