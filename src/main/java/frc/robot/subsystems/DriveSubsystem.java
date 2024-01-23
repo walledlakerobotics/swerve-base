@@ -64,7 +64,7 @@ public class DriveSubsystem extends SubsystemBase {
   private double m_prevTime = WPIUtilJNI.now() * 1e-6;
   private ChassisSpeeds m_prevTarget = new ChassisSpeeds();
 
-  //Field for simulation
+  //Field for odometry
   private final Field2d m_field = new Field2d();
 
   // Odometry class for tracking robot pose

@@ -18,9 +18,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.auton.TemplateAuton;
 import frc.robot.commands.drive.RobotGotoAngle;
-import frc.robot.commands.vision.AutoAlignBottom;
+import frc.robot.commands.vision.AutoAlignAutoAim;
 import frc.robot.commands.vision.AutoAlignCircle;
 import frc.robot.commands.vision.DefaultLimelightPipeline;
+import frc.robot.commands.vision.UpdateOdometry;
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -76,9 +77,11 @@ public class RobotContainer {
         //         true, true),
         //     m_robotDrive));
     
-    // This lets pathplanner identify our commands
-    NamedCommands.registerCommand("Auto Align", new AutoAlignBottom(m_visionSubsystem, m_robotDrive));
+    // "registerCommand" lets pathplanner identify our commands
+    // Here's the autoalign as an example:
+    NamedCommands.registerCommand("Auto Align", new AutoAlignAutoAim(m_visionSubsystem, m_robotDrive));
 
+    //Adding options to the sendable chooser
     m_autonChooser.setDefaultOption("Template Auton", new TemplateAuton(m_robotDrive));
     m_autonChooser.addOption("Path Planner", new PathPlannerAuto("Example Auton"));
 
@@ -88,6 +91,8 @@ public class RobotContainer {
 
     // DEBUG: shuffleboard widget for resetting pose. For now I'm using a default pose of 0, 0 and a rotation of 0
     Shuffleboard.getTab("Swerve").add("reset pose", new InstantCommand(this::resetPose)).withSize(2, 1);
+
+    Shuffleboard.getTab("Vision").add("update odometry", new UpdateOdometry(m_robotDrive, m_visionSubsystem));
   }
 
   /**
