@@ -12,12 +12,6 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Score Piece"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
                   "pathName": "Leave Zone"
                 }
               }
