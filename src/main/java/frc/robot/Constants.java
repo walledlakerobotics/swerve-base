@@ -125,7 +125,7 @@ public final class Constants {
   }
 
   public static final class HeadingConstants {
-    public static final boolean kGyroReversed = false;
+    public static final boolean kGyroReversed = true;
 
     // This is used for making the robot face a certain direction
     public static final double kHeadingP = 0.05;

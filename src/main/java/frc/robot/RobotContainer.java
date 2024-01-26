@@ -83,7 +83,8 @@ public class RobotContainer {
 
     //Adding options to the sendable chooser
     m_autonChooser.setDefaultOption("Template Auton", new TemplateAuton(m_robotDrive));
-    m_autonChooser.addOption("Path Planner", new PathPlannerAuto("Example Auton"));
+    m_autonChooser.addOption("Path Planner", new PathPlannerAuto("Move One Meter"));
+    m_autonChooser.addOption("Path Planner", new PathPlannerAuto("Two Meter Spin"));
 
     // Put chooser on the dashboard
     Shuffleboard.getTab("Autonomous").add(m_autonChooser).withSize(2, 1)
