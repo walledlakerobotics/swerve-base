@@ -111,8 +111,8 @@ public final class Constants {
     public static final double kTurningMaxOutput = 1;
 
     //inversion of drive motors
-    public static final boolean kLeftFrontInverted = false;
-    public static final boolean kLeftRearInverted = false;
+    public static final boolean kLeftFrontInverted = true;
+    public static final boolean kLeftRearInverted = true;
     public static final boolean kRightFrontInverted = true;
     public static final boolean kRightRearInverted = false;
 
