@@ -176,7 +176,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     // Get the target chassis speeds relative to the robot
     final ChassisSpeeds targetVel = (fieldRelative ?
-      ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, Rotation2d.fromDegrees(m_gyro.getAngle()))
+      ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, Rotation2d.fromDegrees(m_gyro.getRate() * (HeadingConstants.kGyroReversed ? -1.0 : 1.0)))
         : new ChassisSpeeds(xSpeed, ySpeed, rot)
     );
 
@@ -276,7 +276,8 @@ public class DriveSubsystem extends SubsystemBase {
   public double getHeading() {
     //double angle = Rotation2d.fromDegrees(m_gyro.getAngle() * (HeadingConstants.kGyroReversed ? -1.0 : 1.0)).getDegrees();
     //return MathUtil.inputModulus(angle, -180, 180);
-    return m_odometry.getPoseMeters().getRotation().getDegrees(); //Check if this is already constrained
+    return m_odometry.getPoseMeters().getRotation().getDegrees(); //NOTE: this is not constrained
+    //return Rotation2d.fromDegrees(m_gyro.getAngle()).getDegrees();
   }
 
   /**
