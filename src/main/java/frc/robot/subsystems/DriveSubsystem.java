@@ -19,8 +19,9 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
-
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.HeadingConstants;
 import frc.robot.Constants.ModuleConstants;
@@ -109,7 +110,9 @@ public class DriveSubsystem extends SubsystemBase {
             Math.hypot(DriveConstants.kTrackWidth / 2, DriveConstants.kWheelBase / 2), // Drive base radius in meters. Distance from robot center to furthest module.
             new ReplanningConfig() // Default path replanning config. See the API for the options here
         ),
-        () -> false, // Parameter for whether to invert the paths or not (set to false for now)
+        // Parameter for whether to invert the paths for red alliance (returns false if alliance is invalid)
+        () -> DriverStation.getAlliance().isPresent() ? 
+            DriverStation.getAlliance().get() == Alliance.Red : false, 
         this // Reference to this subsystem to set requirements
     );
   }
