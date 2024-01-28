@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -70,7 +69,7 @@ public class DriveSubsystem extends SubsystemBase {
   // Odometry class for tracking robot pose
   private final SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
       DriveConstants.kDriveKinematics,
-      Rotation2d.fromDegrees(m_gyro.getAngle() * (HeadingConstants.kGyroReversed ? -1.0 : 1.0)),
+      Rotation2d.fromDegrees(getGyroAngle()),
       new SwerveModulePosition[] {
           m_frontLeft.getPosition(),
           m_frontRight.getPosition(),
@@ -119,7 +118,7 @@ public class DriveSubsystem extends SubsystemBase {
   public void periodic() {
     // Update the odometry in the periodic block
     m_odometry.update(
-        Rotation2d.fromDegrees(m_gyro.getAngle() * (HeadingConstants.kGyroReversed ? -1.0 : 1.0)),
+        Rotation2d.fromDegrees(getGyroAngle()),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -147,7 +146,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void resetOdometry(Pose2d pose) {
     m_odometry.resetPosition(
-        Rotation2d.fromDegrees(m_gyro.getAngle() * (HeadingConstants.kGyroReversed ? -1.0 : 1.0)),
+        Rotation2d.fromDegrees(getGyroAngle()),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -176,7 +175,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     // Get the target chassis speeds relative to the robot
     final ChassisSpeeds targetVel = (fieldRelative ?
-      ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, Rotation2d.fromDegrees(m_gyro.getRate() * (HeadingConstants.kGyroReversed ? -1.0 : 1.0)))
+      ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, Rotation2d.fromDegrees(getGyroAngle()))
         : new ChassisSpeeds(xSpeed, ySpeed, rot)
     );
 
@@ -254,8 +253,6 @@ public class DriveSubsystem extends SubsystemBase {
    * @param angle The angle (in degrees) to set the robot's heading to.
    */
   public void setHeading(double angle) {
-    //The angle adjustment may not be cleared by m_gyro.reset(). Double check in testing
-    //m_gyro.setAngleAdjustment((angle-getHeading()) * (HeadingConstants.kGyroReversed ? -1.0 : 1.0));
     m_odometry.resetPosition(
       new Rotation2d(Math.toRadians(angle)), 
       new SwerveModulePosition[] {
@@ -274,11 +271,20 @@ public class DriveSubsystem extends SubsystemBase {
    * @return the robot's heading in degrees, from -180 to 180
    */
   public double getHeading() {
-    //double angle = Rotation2d.fromDegrees(m_gyro.getAngle() * (HeadingConstants.kGyroReversed ? -1.0 : 1.0)).getDegrees();
-    //return MathUtil.inputModulus(angle, -180, 180);
-    return m_odometry.getPoseMeters().getRotation().getDegrees(); //NOTE: this is not constrained
-    //return Rotation2d.fromDegrees(m_gyro.getAngle()).getDegrees();
+    return SwerveUtils.angleConstrain(
+      m_odometry.getPoseMeters().getRotation().getDegrees()
+    );
   }
+
+  /**
+   * Returns the gyro's angle adjusted for inversion.
+   * @apiNote This may not be the same as getHeading() and is not constrained.
+   * @return The angle of the gyro adjusted for inversion.
+   */
+  private double getGyroAngle() {
+    return m_gyro.getAngle() * (HeadingConstants.kGyroReversed ? -1.0 : 1.0);
+
+  } 
 
   /**
    * Returns the turn rate of the robot.
@@ -290,7 +296,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   /**
-   * A function fed into pathplanner to make it work.
+   * Used by pathplanner to figure out how quickly the robot is moving.
    * 
    * @return The robot-relative translational speeds
    */
@@ -300,9 +306,9 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   /**
-   * Another function fed into pathplanner to make it work.
+   * Used by pathplanner to control the robot.
    * 
-   * @return The robot-relative translational speeds
+   * @param speeds The velocities to move the chassis at.
    */
   private void driveRobotRelative(ChassisSpeeds speeds){
     // This takes the velocities and converts them into precentages (-1 to 1)
