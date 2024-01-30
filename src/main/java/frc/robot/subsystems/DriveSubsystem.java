@@ -13,20 +13,23 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.WPIUtilJNI;
 
+import java.util.Map;
+
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.HeadingConstants;
 import frc.robot.Constants.ModuleConstants;
+import frc.utils.OdometryUtils;
 import frc.utils.SwerveUtils;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -66,6 +69,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   //Field for odometry
   private final Field2d m_field = new Field2d();
+  private final SimpleWidget AllianceWidget;
 
   // Odometry class for tracking robot pose
   private final SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
@@ -111,9 +115,16 @@ public class DriveSubsystem extends SubsystemBase {
             new ReplanningConfig() // Default path replanning config. See the API for the options here
         ),
         // Parameter for whether to invert the paths for red alliance (returns false if alliance is invalid)
-        () -> DriverStation.getAlliance().isPresent() ? 
-            DriverStation.getAlliance().get() == Alliance.Red : false, 
+        () -> OdometryUtils.getAlliance() == Alliance.Red, 
         this // Reference to this subsystem to set requirements
+    );
+
+    AllianceWidget = Shuffleboard.getTab("Swerve").add("Alliance", false)
+    .withProperties(
+      Map.of(
+          "Color when true", "Blue",
+          "Color when false", "Red"
+        )
     );
   }
 
@@ -131,6 +142,30 @@ public class DriveSubsystem extends SubsystemBase {
     
     // Update field widget
     m_field.setRobotPose(getPose());
+
+
+    AllianceWidget.getEntry().setBoolean(OdometryUtils.getAlliance() == Alliance.Blue);
+    
+    // Widget that shows color of alliance (WIP)
+    // switch (OdometryUtils.getAlliance(false)) {
+    //   case Blue:
+    //     widget.withProperties(Map.of(
+    //       "Color when true", "Blue"
+    //     ));
+    //     break;
+      
+    //   case Red:
+    //     widget.withProperties(Map.of(
+    //       "Color when true", "Red"
+    //     ));
+    //     break;
+    
+    //   default:
+    //     widget.withProperties(Map.of(
+    //       "Color when true", "Gray"
+    //     ));
+    //     break;
+    //}
   }
 
   /**

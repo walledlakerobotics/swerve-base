@@ -141,6 +141,11 @@ public final class Constants {
     public static final double kDriveDeadband = 0.05;
   }
 
+  public static final class FieldConstants{
+    public static final double kFieldWidthMeters = 16.541;
+    public static final double KFieldHeightMeters = 8.211;
+  }
+
   public static final class AutoConstants {
     public static final double kMaxSpeedMetersPerSecond = 3;
     public static final double kMaxAccelerationMetersPerSecondSquared = 3;
