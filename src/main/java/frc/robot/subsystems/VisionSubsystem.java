@@ -123,6 +123,9 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic(){
-        m_field.setRobotPose(getRobotPosition());
+        Pose2d limelightPose = getRobotPosition();
+        if(limelightPose != null){
+            m_field.setRobotPose(limelightPose);
+        }
     }
 }
