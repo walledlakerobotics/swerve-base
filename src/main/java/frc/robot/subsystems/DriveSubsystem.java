@@ -119,13 +119,13 @@ public class DriveSubsystem extends SubsystemBase {
         this // Reference to this subsystem to set requirements
     );
 
-    AllianceWidget = Shuffleboard.getTab("Swerve").add("Alliance", false)
-    .withProperties(
-      Map.of(
-          "Color when true", "Blue",
-          "Color when false", "Red"
-        )
-    );
+    AllianceWidget = Shuffleboard.getTab("Swerve").add("Alliance", false);
+    // .withProperties(
+    //   Map.of(
+    //       "Color when true", "Blue",
+    //       "Color when false", "Red"
+    //     )
+    // );
   }
 
   @Override
@@ -142,30 +142,35 @@ public class DriveSubsystem extends SubsystemBase {
     
     // Update field widget
     m_field.setRobotPose(getPose());
-
-
-    AllianceWidget.getEntry().setBoolean(OdometryUtils.getAlliance() == Alliance.Blue);
     
-    // Widget that shows color of alliance (WIP)
-    // switch (OdometryUtils.getAlliance(false)) {
-    //   case Blue:
-    //     widget.withProperties(Map.of(
-    //       "Color when true", "Blue"
-    //     ));
-    //     break;
+    // Widget that shows color of alliance
+    if (OdometryUtils.getAlliance(true) == null) {
+      AllianceWidget.withProperties(Map.of(
+          "Color when true", "Gray"
+        ));
+    }
+    else {
+      switch (OdometryUtils.getAlliance(false)) {
+        case Blue:
+          AllianceWidget.withProperties(Map.of(
+            "Color when true", "Blue"
+          ));
+          break;
+        
+        case Red:
+          AllianceWidget.withProperties(Map.of(
+            "Color when true", "Red"
+          ));
+          break;
       
-    //   case Red:
-    //     widget.withProperties(Map.of(
-    //       "Color when true", "Red"
-    //     ));
-    //     break;
+        default:
+          AllianceWidget.withProperties(Map.of(
+            "Color when true", "Gray"
+          ));
+          break;
+      }  
+    }
     
-    //   default:
-    //     widget.withProperties(Map.of(
-    //       "Color when true", "Gray"
-    //     ));
-    //     break;
-    //}
   }
 
   /**
