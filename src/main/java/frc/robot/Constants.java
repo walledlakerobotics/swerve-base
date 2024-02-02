@@ -142,8 +142,10 @@ public final class Constants {
   }
 
   public static final class FieldConstants{
-    public static final double kFieldWidthMeters = 16.541;
-    public static final double KFieldHeightMeters = 8.211;
+    /** X axis: long side */
+    public static final double kFieldWidthMeters = 16.52;
+    /** Y axis: short side */
+    public static final double KFieldHeightMeters = 8.2;
   }
 
   public static final class AutoConstants {

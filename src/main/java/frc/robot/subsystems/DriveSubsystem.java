@@ -139,8 +139,13 @@ public class DriveSubsystem extends SubsystemBase {
         });
     
     // Update field widget
-    m_field.setRobotPose(getPose());
-    
+    if(OdometryUtils.getAlliance() == Alliance.Red){
+      m_field.setRobotPose(OdometryUtils.redWidgetFlip(getPose()));
+    }
+    else{
+      m_field.setRobotPose(getPose());
+    }
+
     // Widget that shows color of alliance
     if (OdometryUtils.getAlliance(true) == null) {
       AllianceWidget.withProperties(Map.of(

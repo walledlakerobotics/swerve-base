@@ -65,5 +65,31 @@ public class OdometryUtils {
     public static Alliance getAlliance(){
         return getAlliance(false);
     }
+
+    /**
+     * Takes a pose object and returns it flipped on both the Y axis and X axis.
+     * This is used for the Field widget.
+     * @param pose The pose object relative to the blue side (in meters).
+     * @return The new pose object, also relative to the blue side but shifted to the red side.
+     */
+    public static Pose2d redWidgetFlip(Pose2d pose){
+        return new Pose2d(
+            FieldConstants.kFieldWidthMeters-pose.getX(),
+            FieldConstants.KFieldHeightMeters-pose.getY(),
+            new Rotation2d(pose.getRotation().getRadians()-Math.PI)
+        );
+    }
+
+    /**
+     * Flips a translation object's Y value to line up on the red side.
+     * @param position A translation object for the blue side.
+     * @return The translation object mirrored for the red side.
+     */
+    public static Translation2d flipRed(Translation2d position){
+        return new Translation2d(
+            position.getX(),
+            FieldConstants.KFieldHeightMeters-position.getY()
+        );
+    }
     
 }
