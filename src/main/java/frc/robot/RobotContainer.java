@@ -19,7 +19,6 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.commands.auton.TemplateAuton;
 import frc.robot.commands.drive.RobotGotoAngle;
 import frc.robot.commands.vision.AutoAim;
-import frc.robot.commands.vision.AutoAlignCircle;
 import frc.robot.commands.vision.DefaultLimelightPipeline;
 import frc.robot.commands.vision.UpdateOdometry;
 import frc.robot.subsystems.DriveSubsystem;
@@ -76,10 +75,16 @@ public class RobotContainer {
         //         -MathUtil.applyDeadband(m_driverController.getTwist(), OIConstants.kDriveDeadband),
         //         true, true),
         //     m_robotDrive));
-    
     // "registerCommand" lets pathplanner identify our commands
     // Here's the autoalign as an example:
-    NamedCommands.registerCommand("Auto Align", new AutoAim(m_visionSubsystem, m_robotDrive));
+    NamedCommands.registerCommand("Auto Align", 
+            new AutoAim(
+              m_visionSubsystem,
+              m_robotDrive,
+              () -> m_driverController.getLeftY(),
+              () -> m_driverController.getLeftX()
+               )
+    );
 
     //Adding options to the sendable chooser
     m_autonChooser.setDefaultOption("Template Auton", new TemplateAuton(m_robotDrive));
@@ -119,15 +124,20 @@ public class RobotContainer {
             () -> m_robotDrive.zeroHeading(),
             m_robotDrive));
     
-    //Y button: auto aim (high pole) (i set it to be on a button press, not held)
+    //Y button: auto aim
     new JoystickButton(m_driverController, Button.kY.value)
         .toggleOnTrue(
-            new AutoAim(m_visionSubsystem, m_robotDrive)
+            new AutoAim(
+              m_visionSubsystem,
+               m_robotDrive,
+              () -> m_driverController.getLeftY(),
+              () -> m_driverController.getLeftX()
+               )
         );
     
     //A button: makes robot face 0 degrees
     new JoystickButton(m_driverController, Button.kA.value)
-        .onTrue(
+        .toggleOnTrue(
             new RobotGotoAngle(
               m_robotDrive,
               0,
