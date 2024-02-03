@@ -81,7 +81,6 @@ public class VisionSubsystem extends SubsystemBase {
              * and converting them to a robot pose object. Once you do that I'll figure out how
              * to use this object for correcting the odometry.
              */
-            //TODO: implement this function
             double [] robotPosArrary = limelightTable.getEntry("targetpose_robotspace").getDoubleArray(new double[6]);
             SmartDashboard.putNumber("robotposarr0", robotPosArrary[0]);
             return new Pose2d(robotPosArrary[0], robotPosArrary[1], new Rotation2d(robotPosArrary[2]));

@@ -139,10 +139,10 @@ public class DriveSubsystem extends SubsystemBase {
         });
     
     // Update field widget
-    if(OdometryUtils.getAlliance() == Alliance.Red){
+    if (OdometryUtils.getAlliance() == Alliance.Red) {
       m_field.setRobotPose(OdometryUtils.redWidgetFlip(getPose()));
     }
-    else{
+    else {
       m_field.setRobotPose(getPose());
     }
 
@@ -176,9 +176,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @return The pose.
    */
   public Pose2d getPose() {
-    return m_odometry.getPoseMeters() == null?
-      new Pose2d()
-      : m_odometry.getPoseMeters();
+    return m_odometry.getPoseMeters();
   }
 
   /**
