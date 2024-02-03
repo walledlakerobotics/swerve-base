@@ -41,6 +41,24 @@ public class OdometryUtils {
 
         return new Rotation2d(angle);
     }
+    /**
+     * Calculates the distance that point A is from point B
+     * This will be used for auto-aiming.
+     * @param pointA The starting point
+     * @param pointB The ending point
+     * @return The distance from point A to point B.
+     */
+    public static double getDistacnePosToPos(Translation2d pointA, Translation2d pointB){
+        double x1 = pointA.getX();
+        double y1 = pointA.getY();
+
+        double x2 = pointB.getX();
+        double y2 = pointB.getY();
+
+        double distance = Math.sqrt(Math.abs(Math.pow(x1-x2,2))+Math.abs(Math.pow(y1-y2,2)));
+
+        return distance;
+    }
 
     /**
      * Returns the Alliance color.

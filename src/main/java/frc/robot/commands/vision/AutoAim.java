@@ -6,17 +6,23 @@ import frc.robot.subsystems.DriveSubsystem;
 
 import frc.robot.subsystems.VisionSubsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import frc.utils.OdometryUtils;
+import frc.utils.SwerveUtils;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
 
 //Import this so you can make this class a command
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class AutoAlignAutoAim extends Command {
+public class AutoAim extends Command {
 
     //Import any instance variables that are passed into the file below here, such as the subsystem(s) your command interacts with.
     final VisionSubsystem m_visionSubsystem;
@@ -31,14 +37,14 @@ public class AutoAlignAutoAim extends Command {
     private boolean m_complete = false;
 
     //Class Constructor
-    public AutoAlignAutoAim(VisionSubsystem visionSubsystem, DriveSubsystem driveSubsystem){
+    public AutoAim(VisionSubsystem visionSubsystem, DriveSubsystem driveSubsystem){
         m_driveSubsystem = driveSubsystem;
         m_visionSubsystem = visionSubsystem;
         
         //If your command interacts with any subsystem(s), you should pass them into "addRequirements()"
         //This function makes it so your command will only run once these subsystem(s) are free from other commands.
         //This is really important as it will stop scenarios where two commands try to controll a motor at the same time.
-        addRequirements(m_visionSubsystem);
+        addRequirements(m_visionSubsystem, m_driveSubsystem);
     }
 
 
@@ -54,7 +60,7 @@ public class AutoAlignAutoAim extends Command {
     @Override
     public void initialize(){
         //m_chassisSubsystem.setBrakeMode();
-        m_visionSubsystem.setPipeline(VisionConstants.kReflectiveTapePipeline);
+        m_visionSubsystem.setPipeline(VisionConstants.kAprilTagPipeline);
         m_complete = false;
     }
 
@@ -72,13 +78,6 @@ public class AutoAlignAutoAim extends Command {
         double crabCrawl = 0;
         //SmartDashboard.putNumber("motor speed align targets", x);
 
-        if ((targets == 0) || (y > 0)){
-            rotate = 0;
-            forwardSpeed = 0;
-            //m_ledSubsystem.changeLEDState(LEDState.RED);
-        }
-
-        else{
             //this returns how fast the robot shoud move in order to get to middle
             if (Math.abs(angle) > .1){
                 double normalizedAngle = (angle + 180) % 360 - 180;
@@ -94,39 +93,45 @@ public class AutoAlignAutoAim extends Command {
             }
 
             //Move forwards/backwards
-            double distanceFromTarget = m_visionSubsystem.getReflectiveTapeDistance();
+            Translation2d pos1 = m_driveSubsystem.getPose().getTranslation();
+            Translation2d pos2 = new Translation2d(FieldConstants.kSpeakerX, FieldConstants.kSpeakerY);
+            Rotation2d angleToTarget = OdometryUtils.anglePoseToPose(pos1, pos2);
+            double distanceToTarget = OdometryUtils.getDistacnePosToPos(pos1, pos2);
+            SmartDashboard.putNumber("Angle to Goal", angleToTarget.getDegrees());
+            SmartDashboard.putNumber("Distance to Goal", distanceToTarget);
+            SmartDashboard.putNumber("Targets", targets);
 
             //P controller for distance (fred)
             //forwardSpeed = (currentPosition - desiredPosition) * Pconstant
-            if ((distanceFromTarget < VisionConstants.kTopPoleDesiredDistance - VisionConstants.kDistanceTolerance) 
-            || (distanceFromTarget > VisionConstants.kTopPoleDesiredDistance + VisionConstants.kDistanceTolerance)){
-                forwardSpeed = (m_visionSubsystem.getReflectiveTapeDistance() - VisionConstants.kTopPoleDesiredDistance) * VisionConstants.kForwardSpeedPConstant;
-            }
-            else{
-                forwardSpeed = 0;
-            }
+        //     if ((distanceFromTarget < VisionConstants.kTopPoleDesiredDistance - VisionConstants.kDistanceTolerance) 
+        //     || (distanceFromTarget > VisionConstants.kTopPoleDesiredDistance + VisionConstants.kDistanceTolerance)){
+        //         forwardSpeed = (m_visionSubsystem.getReflectiveTapeDistance() - VisionConstants.kTopPoleDesiredDistance) * VisionConstants.kForwardSpeedPConstant;
+        //     }
+        //     else{
+        //         forwardSpeed = 0;
+        //     }
 
-            //Change LED state
-            if((distanceFromTarget > 39) && (distanceFromTarget < 41)){
-                isAlignDistacne = true;
-            }
-            else{
-                isAlignDistacne = false;
-            }
-            if ((x+1 < VisionConstants.kRotationTolerance)&&(x+1 > -VisionConstants.kRotationTolerance)){
-                isAlignRotation = true;
-            }
-            else{
-                isAlignRotation = false;
-            }
-        }
+        //     //Change LED state
+        //     if((distanceFromTarget > 39) && (distanceFromTarget < 41)){
+        //         isAlignDistacne = true;
+        //     }
+        //     else{
+        //         isAlignDistacne = false;
+        //     }
+        //     if ((x+1 < VisionConstants.kRotationTolerance)&&(x+1 > -VisionConstants.kRotationTolerance)){
+        //         isAlignRotation = true;
+        //     }
+        //     else{
+        //         isAlignRotation = false;
+        //     }
+        // }
         //PID
         forwardSpeed = distanceController.calculate(forwardSpeed);
         crabCrawl = distanceController.calculate(crabCrawl);
         SmartDashboard.putNumber("motor speed align forwardspeed", forwardSpeed);
         SmartDashboard.putNumber("motor speed align rotation", rotate);
 
-        m_driveSubsystem.drive(forwardSpeed*.2, crabCrawl*.2, rotate*.2, false, true);
+       // m_driveSubsystem.drive(forwardSpeed*.2, crabCrawl*.2, rotate*.2, false, true);
   
     
         
