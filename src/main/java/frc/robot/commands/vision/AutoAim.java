@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 
 import java.util.function.DoubleSupplier;
 
+
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.MathUtil;
@@ -102,6 +103,7 @@ public class AutoAim extends Command {
         double rotation = angleController.calculate(angle); //speed needed to rotate robot to set point
 
         rotation = MathUtil.clamp(rotation, HeadingConstants.kHeadingMinOutput, HeadingConstants.kHeadingMaxOutput); // clamp value (speed limiter)
+
         
         m_driveSubsystem.drive(
             -MathUtil.applyDeadband(m_xSpeed.getAsDouble(), OIConstants.kDriveDeadband),
