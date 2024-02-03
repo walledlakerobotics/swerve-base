@@ -11,6 +11,9 @@ import frc.utils.SwerveUtils;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+
+import java.security.MessageDigestSpi;
+
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -76,21 +79,7 @@ public class AutoAim extends Command {
         double rotate = 0;
         double angle = m_gyro.getAngle(); 
         double crabCrawl = 0;
-        //SmartDashboard.putNumber("motor speed align targets", x);
-
-            //this returns how fast the robot shoud move in order to get to middle
-            if (Math.abs(angle) > .1){
-                double normalizedAngle = (angle + 180) % 360 - 180;
-                crabCrawl = (normalizedAngle / 180);
-            }
-
-            //Rotate so target is in center
-            if (x+1 > VisionConstants.kRotationTolerance){
-                rotate = VisionConstants.kRotationSpeed;//.6
-            }
-            else if (x+1 < -VisionConstants.kRotationTolerance){
-                rotate = -VisionConstants.kRotationSpeed;
-            }
+        //SmartDashboard.putNumber("motor speed align targets", x); 
 
             //Move forwards/backwards
             Translation2d pos1 = m_driveSubsystem.getPose().getTranslation();
@@ -100,6 +89,33 @@ public class AutoAim extends Command {
             SmartDashboard.putNumber("Angle to Goal", angleToTarget.getDegrees());
             SmartDashboard.putNumber("Distance to Goal", distanceToTarget);
             SmartDashboard.putNumber("Targets", targets);
+
+            /* 
+                get shooter to be at the same angle
+                1. Get absolute encoder value from the shooter 
+                2. Move the shooter to meet that pot value, do this by using PID to go to the angleToTarget
+                3. Shoot the note at the fastest possible speed, lets see how it works
+             */
+            double encoderValue = 0;
+            double offset = 1; 
+            double speedAngleChange = 0;
+            double speedOfShot = 1;
+            double maxDistanceShot = 20;
+
+            if (distanceToTarget > maxDistanceShot){
+                m_driveSubsystem.drive(0, distanceController.calculate(1), 0, false, true);
+            }
+
+            if (Math.abs(encoderValue-offset)>angleToTarget.getDegrees()){
+                speedAngleChange = Math.abs(encoderValue-angleToTarget.getDegrees());
+                speedAngleChange = distanceController.calculate(speedAngleChange);
+            }
+
+
+
+            
+            //we need to find angle of shot, theta, then we need to find speed of shot. Are we just finding a vector?
+
 
             //P controller for distance (fred)
             //forwardSpeed = (currentPosition - desiredPosition) * Pconstant
