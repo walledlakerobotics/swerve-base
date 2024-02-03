@@ -10,6 +10,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class VisionSubsystem extends SubsystemBase {
     final private NetworkTableEntry ty;
@@ -30,7 +31,6 @@ public class VisionSubsystem extends SubsystemBase {
         setPipeline(VisionConstants.kDefaultPipeline);
 
         visionTab.addInteger("Pipeline", () -> getPipeline());
-        visionTab.addDouble("Distance", () -> getReflectiveTapeDistance());
         visionTab.add(m_field);
     }
 
@@ -69,34 +69,6 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     /**
-     * Returns the distance between the robot and the reflective tape goal. Returns 0 if no targets can be found.
-     */
-    public double getReflectiveTapeDistance(){
-        //Check for no targets
-        if(getTV() == 0){
-            return 0;
-        }
-        
-        final double targetOffsetAngle_Vertical = getY();
-
-        // distance from the target to the floor
-        final double goalHeightInches;
-
-        if(targetOffsetAngle_Vertical > 0){
-            goalHeightInches = VisionConstants.kTopReflectiveTapeHeight;
-        }
-        else{
-            goalHeightInches = VisionConstants.kBottomReflectiveTapeHeight;
-        }
-
-        final double angleToGoalDegrees = VisionConstants.kLimelightMountAngle + targetOffsetAngle_Vertical;
-        final double angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
-
-        //calculate distance
-        return (goalHeightInches - VisionConstants.kLimelightLensHeight) / Math.tan(angleToGoalRadians);
-    }
-
-    /**
      * Uses whatever april tag is in front of it to estimate the robot's position on the field. 
      * Returns null if no april tag is in view.
      * @return The position of the robot, or null.
@@ -110,7 +82,9 @@ public class VisionSubsystem extends SubsystemBase {
              * to use this object for correcting the odometry.
              */
             //TODO: implement this function
-            return new Pose2d(0, 0, new Rotation2d(0));
+            double [] robotPosArrary = limelightTable.getEntry("targetpose_robotspace").getDoubleArray(new double[6]);
+            SmartDashboard.putNumber("robotposarr0", robotPosArrary[0]);
+            return new Pose2d(robotPosArrary[0], robotPosArrary[1], new Rotation2d(robotPosArrary[2]));
         }
         return null;
     }

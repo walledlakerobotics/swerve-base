@@ -146,6 +146,9 @@ public final class Constants {
     public static final double kFieldWidthMeters = 16.52;
     /** Y axis: short side */
     public static final double KFieldHeightMeters = 8.2;
+    
+    public static final double kSpeakerX = 20;
+    public static final double kSpeakerY = 20;
   }
 
   public static final class AutoConstants {
@@ -176,8 +179,10 @@ public final class Constants {
     public static final double kLimelightLensHeight = 20;
 
     //Height of reflective tape poles in inches
-    public static final double kTopReflectiveTapeHeight = 24;
+    public static final double kSpeakerHeightFromLimelightHeightInches = 71.25;
     public static final double kBottomReflectiveTapeHeight = 24;
+    public static final double kLimelightDistanceFromCenterInches = 4.5;
+    
 
     public static final double kTopPoleDesiredDistance = 24;
     public static final double kDistanceTolerance = 2;
