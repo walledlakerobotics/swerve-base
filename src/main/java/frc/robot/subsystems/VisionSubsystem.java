@@ -8,31 +8,30 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class VisionSubsystem extends SubsystemBase {
     final private NetworkTableEntry ty;
     final private NetworkTableEntry tx; 
-    //final private NetworkTableEntry tl;
     final private NetworkTableEntry tv;
     final private NetworkTable limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
 
-    //Field for april tag detection
+    // Field to visualize april tag detection
     private final Field2d m_field = new Field2d();
-    
+
+    private final ShuffleboardTab visionTab = Shuffleboard.getTab("Vision");
 
     public VisionSubsystem(){
         ty = limelightTable.getEntry("ty");
         tx = limelightTable.getEntry("tx");
-        //TODO: what is tl and why is it not configured properly?
-        //tl = limelightTable.getEntry("ty");
         tv = limelightTable.getEntry("tv");
 
         setPipeline(VisionConstants.kDefaultPipeline);
 
-        Shuffleboard.getTab("Vision").addInteger("Pipeline", () -> getPipeline());
-        Shuffleboard.getTab("Vision").add(m_field);
+        visionTab.addInteger("Pipeline", () -> getPipeline());
+        visionTab.add(m_field);
     }
 
     //tv = valid targets
@@ -61,10 +60,6 @@ public class VisionSubsystem extends SubsystemBase {
     public double getY(){
         return ty.getDouble(0.0);
     }
-    
-    // public double getTL(){
-    //     return tl.getDouble(0.0);
-    // }
     
     /**
      * Returns the number of valid targets detected by the limelight. Returns 0 if no targets are found.
@@ -97,8 +92,9 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic(){
-        if(getRobotPosition() != null){
-            m_field.setRobotPose(getRobotPosition());
+        Pose2d limelightPose = getRobotPosition();
+        if(limelightPose != null){
+            m_field.setRobotPose(limelightPose);
         }
     }
 }

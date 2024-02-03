@@ -29,6 +29,7 @@ import frc.robot.Constants.ModuleConstants;
 import frc.utils.OdometryUtils;
 import frc.utils.SwerveUtils;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -67,8 +68,11 @@ public class DriveSubsystem extends SubsystemBase {
   private double m_prevTime = WPIUtilJNI.now() * 1e-6;
   private ChassisSpeeds m_prevTarget = new ChassisSpeeds();
 
-  //Field for odometry
+  // Field for odometry
   private final Field2d m_field = new Field2d();
+
+  // Shuffleboard objects
+  private final ShuffleboardTab swerveTab = Shuffleboard.getTab("Swerve");
   private final SimpleWidget AllianceWidget;
 
   // Odometry class for tracking robot pose
@@ -89,16 +93,16 @@ public class DriveSubsystem extends SubsystemBase {
     m_gyro.enableLogging(true);
 
     // Shuffleboard values
-    Shuffleboard.getTab("Swerve").addDouble("Robot Heading", () -> getHeading());
+    swerveTab.addDouble("Robot Heading", () -> getHeading());
     
-    Shuffleboard.getTab("Swerve").addDouble("frontLeft angle", () -> SwerveUtils.angleConstrain(m_frontLeft.getPosition().angle.getDegrees()));
-    Shuffleboard.getTab("Swerve").addDouble("frontRight angle", () -> SwerveUtils.angleConstrain(m_frontRight.getPosition().angle.getDegrees()));
-    Shuffleboard.getTab("Swerve").addDouble("rearLeft angle", () -> SwerveUtils.angleConstrain(m_rearLeft.getPosition().angle.getDegrees()));
-    Shuffleboard.getTab("Swerve").addDouble("rearRight angle", () -> SwerveUtils.angleConstrain(m_rearRight.getPosition().angle.getDegrees()));
-    Shuffleboard.getTab("Swerve").add("Field", m_field);
+    swerveTab.addDouble("frontLeft angle", () -> SwerveUtils.angleConstrain(m_frontLeft.getPosition().angle.getDegrees()));
+    swerveTab.addDouble("frontRight angle", () -> SwerveUtils.angleConstrain(m_frontRight.getPosition().angle.getDegrees()));
+    swerveTab.addDouble("rearLeft angle", () -> SwerveUtils.angleConstrain(m_rearLeft.getPosition().angle.getDegrees()));
+    swerveTab.addDouble("rearRight angle", () -> SwerveUtils.angleConstrain(m_rearRight.getPosition().angle.getDegrees()));
+    swerveTab.add("Field", m_field);
     
-    Shuffleboard.getTab("Swerve").addDouble("robot X", () -> getPose().getX());
-    Shuffleboard.getTab("Swerve").addDouble("robot Y", () -> getPose().getY());
+    swerveTab.addDouble("robot X", () -> getPose().getX());
+    swerveTab.addDouble("robot Y", () -> getPose().getY());
     
     // Configure the AutoBuilder
     AutoBuilder.configureHolonomic(
@@ -119,13 +123,7 @@ public class DriveSubsystem extends SubsystemBase {
         this // Reference to this subsystem to set requirements
     );
 
-    AllianceWidget = Shuffleboard.getTab("Swerve").add("Alliance", false);
-    // .withProperties(
-    //   Map.of(
-    //       "Color when true", "Blue",
-    //       "Color when false", "Red"
-    //     )
-    // );
+    AllianceWidget = swerveTab.add("Alliance", true);
   }
 
   @Override
@@ -141,8 +139,13 @@ public class DriveSubsystem extends SubsystemBase {
         });
     
     // Update field widget
-    m_field.setRobotPose(getPose());
-    
+    if(OdometryUtils.getAlliance() == Alliance.Red){
+      m_field.setRobotPose(OdometryUtils.redWidgetFlip(getPose()));
+    }
+    else{
+      m_field.setRobotPose(getPose());
+    }
+
     // Widget that shows color of alliance
     if (OdometryUtils.getAlliance(true) == null) {
       AllianceWidget.withProperties(Map.of(
@@ -160,12 +163,6 @@ public class DriveSubsystem extends SubsystemBase {
         case Red:
           AllianceWidget.withProperties(Map.of(
             "Color when true", "Red"
-          ));
-          break;
-      
-        default:
-          AllianceWidget.withProperties(Map.of(
-            "Color when true", "Gray"
           ));
           break;
       }  
