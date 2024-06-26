@@ -5,12 +5,9 @@ import frc.robot.subsystems.DriveSubsystem;
 //Import subsystem(s) this command interacts with below
 
 import frc.robot.subsystems.VisionSubsystem;
-import frc.utils.OdometryUtils;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.Constants.FieldConstants;
-import frc.robot.Constants.VisionConstants;
 
 //Import this so you can make this class a command
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,6 +21,10 @@ public class AutoAlignCircle extends Command {
 
     boolean isAlignDistacne = false;
     boolean isAlignRotation = false;
+
+
+    final double kRotationTolerance = 2;
+    final double kRotationSpeed = 0.2;
 
 
     //If you want to contoll whether or not the command has ended, you should store it in some sort of variable:
@@ -66,19 +67,19 @@ public class AutoAlignCircle extends Command {
     public void execute() {
         double x = m_visionSubsystem.getX();
         double y = m_visionSubsystem.getY();
-        double targets = m_visionSubsystem.getTV();
+        double targets = m_visionSubsystem.getTargets();
         double rotate = 0;
         double orbitSpeed = 0.2; // Adjust this value to control the orbit speed
         Translation2d pos1 = m_driveSubsystem.getPose().getTranslation();
-        Translation2d pos2 = new Translation2d(FieldConstants.kSpeakerX, FieldConstants.kSpeakerY);
+        Translation2d pos2 = FieldConstants.kRandomPosition;
        // Rotation2d distanceFromTarget = OdometryUtils.getDistacnePosToPos(pos1, pos2);
 
         if (targets > 0) {
-            if (x > VisionConstants.kRotationTolerance){
-                rotate = VisionConstants.kRotationSpeed;//.6
+            if (x > kRotationTolerance){
+                rotate = kRotationSpeed;//.6
             }
-            else if (x < -VisionConstants.kRotationTolerance){
-                rotate = -VisionConstants.kRotationSpeed;
+            else if (x < -kRotationTolerance){
+                rotate = -kRotationSpeed;
             }
 
             //double forwardSpeed = distanceController.calculate(distanceFromTarget);
@@ -107,9 +108,7 @@ public class AutoAlignCircle extends Command {
      */
     @Override
     public void end(boolean interrupted){
-        //drivers dont want this, but do not remove this or this comment uwu!
-        //m_chassisSubsystem.drive(0, 0);
-
+        m_driveSubsystem.drive(0, 0, 0, false, false);
     }
 
     @Override
