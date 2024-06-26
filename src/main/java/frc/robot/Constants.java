@@ -4,11 +4,13 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -30,14 +32,12 @@ public final class Constants {
     public static final double kMaxSpeedMetersPerSecond = 5;
     public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
 
-    public static final double kMagnitudeSlewRate = 1.8 * kMaxSpeedMetersPerSecond; // meters per second^2
-    public static final double kRotationalSlewRate = 2.0 * kMaxAngularSpeed;        // radians per second^2
+    public static final double kMagnitudeSlewRate = 5 * kMaxSpeedMetersPerSecond; // meters per second^2
+    public static final double kRotationalSlewRate = 5 * kMaxAngularSpeed;        // radians per second^2
 
     // Chassis configuration
-    public static final double kTrackWidth = Units.inchesToMeters(21);
-    // Distance between centers of right and left wheels on robot
-    public static final double kWheelBase = Units.inchesToMeters(21);
-    // Distance between front and back wheels on robot
+    public static final double kTrackWidth = Units.inchesToMeters(21); // Distance between centers of right and left wheels on robot
+    public static final double kWheelBase = Units.inchesToMeters(21); // Distance between front and back wheels on robot
     public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
         new Translation2d(kWheelBase / 2, kTrackWidth / 2),
         new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
@@ -62,9 +62,8 @@ public final class Constants {
     public static final int kRearRightTurningCanId = 7;
   }
 
+  // This is specifically for constants related to the individual swerve modules and not to the drive subsystem itself.
   public static final class ModuleConstants {
-    // Inverts the turning encoder.
-    public static final boolean kTurningEncoderInverted = false;
 
     // Calculations required for driving motor conversion factors and feed forward
     public static final double kDrivingMotorFreeSpeedRps = NeoMotorConstants.kFreeSpeedRpm / 60;
@@ -90,7 +89,6 @@ public final class Constants {
     public static final double kDrivingP = 0.04;
     public static final double kDrivingI = 0;
     public static final double kDrivingD = 0;
-    //TODO: We need to figure out how feedforwards work and how to use them.
     public static final double kDrivingFF = 1 / kDriveWheelFreeSpeedRps; 
     public static final double kDrivingMinOutput = -1;
     public static final double kDrivingMaxOutput = 1;
@@ -113,54 +111,79 @@ public final class Constants {
     // Unless oriented differently, all of your turning motors should spin in the same direction.
     public static final boolean kTurningMotorsInverted = true;
 
+    // Inversion of turning ENCODERS (not motors).
+    // Unless oriented differently, all of your turning encoders should spin in the same direction.
+    public static final boolean kTurningEncoderInverted = false;
+
     public static final IdleMode kDrivingMotorIdleMode = IdleMode.kBrake;
     public static final IdleMode kTurningMotorIdleMode = IdleMode.kBrake;
 
-    //TODO: probably not super important, but we should look into how to properly calculate current limits.
     public static final int kDrivingMotorCurrentLimit = 35; // amps
-    public static final int kTurningMotorCurrentLimit = 20; // amps
+    public static final int kTurningMotorCurrentLimit = 35; // amps
   }
 
   public static final class HeadingConstants {
+    // The gyro should be CCW positive
     public static final boolean kGyroReversed = true;
 
     // This is used for making the robot face a certain direction
-    public static final double kHeadingP = 0.05;
+    public static final double kHeadingP = 0.025;
     public static final double kHeadingI = 0;
     public static final double kHeadingD = 0.001;
-    public static final double kHeadingMinOutput = -0.5;
-    public static final double kHeadingMaxOutput = 0.5;
-    public static final double kHeadingTolerance = 1;
+    public static final double kHeadingMaxOutput = 0.8; // Percent
+    public static final double kHeadingTolerance = 1; // Degrees
+
+    public static final double kTranslationP = 5;
+    public static final double kTranslationI = 0;
+    public static final double kTranslationD = 0;
+    public static final double kTranslationMaxOutput = 1; // Percent 
+    public static final double kTranslationTolerance = Units.inchesToMeters(3); // Meters
   }
 
   public static final class OIConstants {
     public static final int kDriverControllerPort = 0;
-    public static final double kDriveDeadband = 0.05;
+    public static final int kCoDriverControllerPort = 1;
+    
+    public static final double kJoystickDeadband = 0.05;
+    public static final double kTriggerDeadband = 0.5;
   }
 
-  public static final class FieldConstants{
+  public static final class FieldConstants {
     /** X axis: long side */
-    public static final double kFieldWidthMeters = 16.52;
+    public static final double kFieldWidthMeters = 16.54175;
     /** Y axis: short side */
-    public static final double KFieldHeightMeters = 8.2;
+    public static final double kFieldHeightMeters = 8.2;
     
-    public static final double kSpeakerX = 20;
-    public static final double kSpeakerY = 20;
+    // Translation2d can be used to store the coordinates of important positions on the field:
+    public static final Translation2d kRandomPosition = new Translation2d(
+      kFieldWidthMeters/2, kFieldHeightMeters/2
+    );
   }
 
   public static final class AutoConstants {
-    public static final double kMaxSpeedMetersPerSecond = 3;
-    public static final double kMaxAccelerationMetersPerSecondSquared = 3;
+    public static final double kAutoMaxSpeedMetersPerSecond = 3;
     public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
-    public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
 
-    public static final double kPXController = 1;
-    public static final double kPYController = 1;
-    public static final double kPThetaController = 1;
+    public static final PIDConstants kAutoTranslationPID = new PIDConstants(
+      HeadingConstants.kTranslationP, 
+      HeadingConstants.kTranslationI, 
+      HeadingConstants.kTranslationD
+    );
 
-    // Constraint for the motion profiled robot angle controller
-    public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
-        kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
+    public static final PIDConstants kAutoAngularPID = new PIDConstants(
+      5, 
+      0, 
+      0
+    );
+
+    public static final HolonomicPathFollowerConfig kPathPlannerConfig = new HolonomicPathFollowerConfig( 
+      kAutoTranslationPID, // Translation PID constants
+      kAutoAngularPID, // Rotation PID constants
+      kAutoMaxSpeedMetersPerSecond, // Max module speed, in m/s
+      // Using pythagoras's theorem to find distance from robot center to module
+      Math.hypot(DriveConstants.kTrackWidth / 2, DriveConstants.kWheelBase / 2), // Drive base radius in meters. Distance from robot center to furthest module.
+      new ReplanningConfig() // Default path replanning config. See the API for the options here
+    );
   }
 
   public static final class NeoMotorConstants {
@@ -168,30 +191,9 @@ public final class Constants {
   }
 
   public static final class VisionConstants {
-
-    //How many degrees is your limelight rotated from perfectly vertical
-    public static final double kLimelightMountAngle = 0; //NOTE: we should really take into account the rotation of the robot using the pitch of the NavX - Noah
-
-    //Limelight lens height from floor in inches
-    public static final double kLimelightLensHeight = 20;
-
-    //Height of reflective tape poles in inches
-    public static final double kSpeakerHeightFromLimelightHeightInches = 71.25;
-    public static final double kBottomReflectiveTapeHeight = 24;
-    public static final double kLimelightDistanceFromCenterInches = 4.5;
-    
-
-    public static final double kTopPoleDesiredDistance = 24;
-    public static final double kDistanceTolerance = 2;
-    public static final double kMaxForwardSpeed = 0.7;
-    public static final double kForwardSpeedPConstant = 0.1;
-
-    public static final double kRotationSpeed = 0.2;
-    public static final double kRotationTolerance = 2;
-
-    //Pipeline constants
+    // Pipeline constants
     public static final int kAprilTagPipeline = 0;
-    public static final int kReflectiveTapePipeline = 3;
+    // public static final int kReflectiveTapePipeline = 3;
     public static final int kGamePiecePipeline = 2;
 
     /* NOTE: the limelight starts with pipeline 0 by default, so we need to make sure we make that pipeline something 

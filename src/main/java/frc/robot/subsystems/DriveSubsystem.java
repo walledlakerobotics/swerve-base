@@ -4,30 +4,31 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.WPIUtilJNI;
 
 import java.util.Map;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.HeadingConstants;
 import frc.robot.Constants.ModuleConstants;
-import frc.utils.OdometryUtils;
+import frc.utils.FieldUtils;
 import frc.utils.SwerveUtils;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
@@ -65,18 +66,26 @@ public class DriveSubsystem extends SubsystemBase {
   
   // Note: the NavX takes a second to configure before it can be used. I have seen some teams create the gyro in a separate thread, which might be worth considering.
 
+  // These values are for tracking slew rate, which lets the robot accelerate and slow down gradually
   private double m_prevTime = WPIUtilJNI.now() * 1e-6;
   private ChassisSpeeds m_prevTarget = new ChassisSpeeds();
 
-  // Field for odometry
+  // Field widget for displaying odometry
   private final Field2d m_field = new Field2d();
 
   // Shuffleboard objects
   private final ShuffleboardTab swerveTab = Shuffleboard.getTab("Swerve");
-  private final SimpleWidget AllianceWidget;
+  // Add alliance widget (it's just a boolean widget but I manually change the color)
+  private final SimpleWidget m_allianceWidget = swerveTab.add("Alliance", true); 
+  // Widget for toggling limelight data
+  private final SimpleWidget m_useLimelightData;
 
-  // Odometry class for tracking robot pose
-  private final SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
+  // Suppliers for pose estimation with vision data
+  private final Supplier<Pose2d> m_visionPose;
+  private final DoubleSupplier m_visionTimestamp;
+
+  // Swerve pose estimator
+  private final SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(
       DriveConstants.kDriveKinematics,
       Rotation2d.fromDegrees(getGyroAngle()),
       new SwerveModulePosition[] {
@@ -84,84 +93,109 @@ public class DriveSubsystem extends SubsystemBase {
           m_frontRight.getPosition(),
           m_rearLeft.getPosition(),
           m_rearRight.getPosition()
-      }
+      },
+      new Pose2d(),
+      /**
+       * VecBuilder -> Standard deviations of model states. Increase these numbers to trust your model's state estimates less. This
+       * matrix is in the form [x, y, theta]ᵀ, with units in meters and radians.
+      */
+      VecBuilder.fill(0.1, 0.1, .05),
+      /**
+       * Standard deviations of the vision measurements. Increase these numbers to trust global measurements from vision
+       * less. This matrix is in the form [x, y, theta]ᵀ, with units in meters and radians.
+      */
+      VecBuilder.fill(2, 2, 3)
   );
 
-  /** Creates a new DriveSubsystem. */
-  public DriveSubsystem() {
+  /** 
+   * This controls all of the swerve modules, along with the pathplanner setup, the gyro,
+   * the odometry, and the use of odometry and vision data to estimate the robot's pose.
+   */
+  public DriveSubsystem(Supplier<Pose2d> visionPosition, DoubleSupplier visionTimestamp) {
+    m_visionPose = visionPosition;
+    m_visionTimestamp = visionTimestamp;
+
     // NOTE: is this really necessary??
     m_gyro.enableLogging(true);
-
-    // Shuffleboard values
-    swerveTab.addDouble("Robot Heading", () -> getHeading());
-    
+   
+    // Widgets for swerve module angles 
     swerveTab.addDouble("frontLeft angle", () -> SwerveUtils.angleConstrain(m_frontLeft.getPosition().angle.getDegrees()));
     swerveTab.addDouble("frontRight angle", () -> SwerveUtils.angleConstrain(m_frontRight.getPosition().angle.getDegrees()));
     swerveTab.addDouble("rearLeft angle", () -> SwerveUtils.angleConstrain(m_rearLeft.getPosition().angle.getDegrees()));
     swerveTab.addDouble("rearRight angle", () -> SwerveUtils.angleConstrain(m_rearRight.getPosition().angle.getDegrees()));
-    swerveTab.add("Field", m_field);
+
+    // Gyro widget
+    swerveTab.addDouble("Robot Heading", () -> getHeading())
+      .withWidget(BuiltInWidgets.kGyro)
+      .withSize(2, 2)
+      .withProperties(Map.of(
+        "Counter Clockwise", true));
+    
+    // Field widget for displaying odometry estimation
+    swerveTab.add("Field", m_field)
+      .withSize(6, 3);
     
     swerveTab.addDouble("robot X", () -> getPose().getX());
     swerveTab.addDouble("robot Y", () -> getPose().getY());
+
+    // // Gyro values for testing
+    // swerveTab.addDouble("gyro pitch", () -> m_gyro.getPitch());
+    // swerveTab.addDouble("gyro roll", () -> m_gyro.getRoll());
     
     // Configure the AutoBuilder
     AutoBuilder.configureHolonomic(
-        this::getPose, // Robot pose supplier
-        this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
+        () -> FieldUtils.flipGlobalBlue(getPose()), // Robot pose supplier
+        (Pose2d newPose) -> resetOdometry(FieldUtils.flipGlobalBlue(newPose)), // Method to reset odometry (will be called if your auto has a starting pose)
         this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
         this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
-        new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
-            new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-            new PIDConstants(5.0, 0.0, 0.0), // Rotation PID constants
-            DriveConstants.kMaxSpeedMetersPerSecond, // Max module speed, in m/s
-            // Using pythagoras's theorem to find distance from robot center to module
-            Math.hypot(DriveConstants.kTrackWidth / 2, DriveConstants.kWheelBase / 2), // Drive base radius in meters. Distance from robot center to furthest module.
-            new ReplanningConfig() // Default path replanning config. See the API for the options here
-        ),
-        // Parameter for whether to invert the paths for red alliance (returns false if alliance is invalid)
-        () -> OdometryUtils.getAlliance() == Alliance.Red, 
+        AutoConstants.kPathPlannerConfig, // Path planner configuration for holonomic drive.
+        () -> FieldUtils.isRedAlliance(), // Parameter for whether to invert the paths for red alliance (returns false if alliance is invalid)
         this // Reference to this subsystem to set requirements
     );
 
-    AllianceWidget = swerveTab.add("Alliance", true);
+    m_useLimelightData = swerveTab.add("Limelight Data", true)
+      .withWidget(BuiltInWidgets.kToggleSwitch); 
   }
 
   @Override
   public void periodic() {
-    // Update the odometry in the periodic block
+    // Update pose estimation with odometry data
     m_odometry.update(
-        Rotation2d.fromDegrees(getGyroAngle()),
-        new SwerveModulePosition[] {
-            m_frontLeft.getPosition(),
-            m_frontRight.getPosition(),
-            m_rearLeft.getPosition(),
-            m_rearRight.getPosition()
-        });
+      Rotation2d.fromDegrees(getGyroAngle()),
+       new SwerveModulePosition[] {
+          m_frontLeft.getPosition(),
+          m_frontRight.getPosition(),
+          m_rearLeft.getPosition(),
+          m_rearRight.getPosition()
+      });
+      
+    // Try to add vision data to pose estimation
+    double timestamp = m_visionTimestamp.getAsDouble();
+    Pose2d pose = m_visionPose.get();
+    
+    if((pose != null) && (m_useLimelightData.getEntry().getBoolean(true))){
+      m_odometry.addVisionMeasurement(pose, timestamp);
+    }
     
     // Update field widget
-    if (OdometryUtils.getAlliance() == Alliance.Red) {
-      m_field.setRobotPose(OdometryUtils.redWidgetFlip(getPose()));
-    }
-    else {
-      m_field.setRobotPose(getPose());
-    }
-
+    m_field.setRobotPose(FieldUtils.fieldWidgetScale(getPose()));
+  
     // Widget that shows color of alliance
-    if (OdometryUtils.getAlliance(true) == null) {
-      AllianceWidget.withProperties(Map.of(
+    if (FieldUtils.getAlliance(true) == null) {
+      m_allianceWidget.withProperties(Map.of(
           "Color when true", "Gray"
         ));
     }
     else {
-      switch (OdometryUtils.getAlliance(false)) {
+      switch (FieldUtils.getAlliance(false)) {
         case Blue:
-          AllianceWidget.withProperties(Map.of(
+          m_allianceWidget.withProperties(Map.of(
             "Color when true", "Blue"
           ));
           break;
         
         case Red:
-          AllianceWidget.withProperties(Map.of(
+          m_allianceWidget.withProperties(Map.of(
             "Color when true", "Red"
           ));
           break;
@@ -176,7 +210,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @return The pose.
    */
   public Pose2d getPose() {
-    return m_odometry.getPoseMeters();
+    return m_odometry.getEstimatedPosition();
   }
 
   /**
@@ -215,7 +249,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     // Get the target chassis speeds relative to the robot
     final ChassisSpeeds targetVel = (fieldRelative ?
-      ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, Rotation2d.fromDegrees(getGyroAngle()))
+      ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, Rotation2d.fromDegrees(getHeading()))
         : new ChassisSpeeds(xSpeed, ySpeed, rot)
     );
 
@@ -284,7 +318,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Zeroes the heading of the robot. */
   public void zeroHeading() {
-    m_gyro.reset();
+    setHeading(0);
   }
 
   /**
@@ -294,14 +328,17 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void setHeading(double angle) {
     m_odometry.resetPosition(
-      new Rotation2d(Math.toRadians(angle)), 
+      Rotation2d.fromDegrees(getGyroAngle()), 
       new SwerveModulePosition[] {
         m_frontLeft.getPosition(),
         m_frontRight.getPosition(),
         m_rearLeft.getPosition(),
         m_rearRight.getPosition()
       }, 
-      getPose()
+      new Pose2d(
+        getPose().getTranslation(),
+        Rotation2d.fromDegrees(angle)
+      )
     );
   }
 
@@ -312,19 +349,34 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public double getHeading() {
     return SwerveUtils.angleConstrain(
-      m_odometry.getPoseMeters().getRotation().getDegrees()
+      m_odometry.getEstimatedPosition().getRotation().getDegrees()
     );
   }
 
   /**
    * Returns the gyro's angle adjusted for inversion.
-   * @apiNote This may not be the same as getHeading() and is not constrained.
+   * @apiNote This may not be the same as getHeading() and is not constrained from -180 to 180.
    * @return The angle of the gyro adjusted for inversion.
    */
   private double getGyroAngle() {
     return m_gyro.getAngle() * (HeadingConstants.kGyroReversed ? -1.0 : 1.0);
+  }
 
-  } 
+  /**
+   * Returns the pitch of the ROBOT (not necessarily the gyro).
+   * @return The pitch of the robot in degrees from -180 to 180.
+   */
+  public double getRobotPitch() {
+    return m_gyro.getRoll();
+  }
+
+  /**
+   * Returns the roll of the ROBOT (not necessarily the gyro).
+   * @return The roll of the robot in degrees from -180 to 180.
+   */
+  public double getRobotRoll() {
+    return m_gyro.getPitch();
+  }
 
   /**
    * Returns the turn rate of the robot.

@@ -15,8 +15,6 @@ public class UpdateOdometry extends Command {
   public UpdateOdometry(DriveSubsystem driveSubsystem, VisionSubsystem visionSubsystem) {
     m_driveSubsystem = driveSubsystem;
     m_visionSubsystem = visionSubsystem;
-    
-    addRequirements(m_visionSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -34,4 +32,3 @@ public class UpdateOdometry extends Command {
     return true;
   }
 }
-
