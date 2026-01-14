@@ -1,7 +1,6 @@
 package frc.robot;
 
 import com.revrobotics.spark.FeedbackSensor;
-import com.revrobotics.spark.config.AbsoluteEncoderConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
@@ -16,7 +15,7 @@ public final class Configs {
       // Use module constants to calculate conversion factors and feed forward gain.
       double drivingFactor = ModuleConstants.kWheelDiameterMeters * Math.PI
           / ModuleConstants.kDrivingMotorReduction;
-      double turningFactor = 2 * Math.PI;
+      double turningFactor = 1 / ModuleConstants.kTurningMotorReduction;
       double nominalVoltage = 12.0;
       double drivingVelocityFeedForward = nominalVoltage / ModuleConstants.kDriveWheelFreeSpeedRps;
 
@@ -36,15 +35,9 @@ public final class Configs {
           .idleMode(IdleMode.kBrake)
           .smartCurrentLimit(20);
 
-      turningConfig.absoluteEncoder
-          // Invert the turning encoder, since the output shaft rotates in the opposite
-          // direction of the steering motor in the MAXSwerve Module.
-          .inverted(true)
-          .positionConversionFactor(turningFactor) // radians
-          .velocityConversionFactor(turningFactor / 60.0) // radians per second
-          // This applies to REV Through Bore Encoder V2 (use REV_ThroughBoreEncoder for
-          // V1):
-          .apply(AbsoluteEncoderConfig.Presets.REV_ThroughBoreEncoderV2);
+      turningConfig.encoder
+          .positionConversionFactor(turningFactor) // rotations
+          .velocityConversionFactor(turningFactor / 60.0); // rotations per second
 
       turningConfig.closedLoop
           .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)

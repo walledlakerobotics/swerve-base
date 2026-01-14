@@ -30,16 +30,20 @@ import frc.robot.Constants.ModuleConstants;
 public class Drivetrain extends SubsystemBase {
   // Create SwerveModules
   private final SwerveModule m_frontLeft = new SwerveModule(DriveConstants.kFrontLeftDrivingCanId,
-      DriveConstants.kFrontLeftTurningCanId, DriveConstants.kFrontLeftChassisAngularOffset);
+      DriveConstants.kFrontLeftTurningCanId, DriveConstants.kFrontLeftTurningEncoderCanId,
+      DriveConstants.kFrontLeftChassisAngularOffset);
 
   private final SwerveModule m_frontRight = new SwerveModule(DriveConstants.kFrontRightDrivingCanId,
-      DriveConstants.kFrontRightTurningCanId, DriveConstants.kFrontRightChassisAngularOffset);
+      DriveConstants.kFrontRightTurningCanId, DriveConstants.kFrontRightTurningEncoderCanId,
+      DriveConstants.kFrontRightChassisAngularOffset);
 
   private final SwerveModule m_rearLeft = new SwerveModule(DriveConstants.kRearLeftDrivingCanId,
-      DriveConstants.kRearLeftTurningCanId, DriveConstants.kBackLeftChassisAngularOffset);
+      DriveConstants.kRearLeftTurningCanId, DriveConstants.kRearLeftTurningEncoderCanId,
+      DriveConstants.kBackLeftChassisAngularOffset);
 
   private final SwerveModule m_rearRight = new SwerveModule(DriveConstants.kRearRightDrivingCanId,
-      DriveConstants.kRearRightTurningCanId, DriveConstants.kBackRightChassisAngularOffset);
+      DriveConstants.kRearRightTurningCanId, DriveConstants.kRearRightTurningEncoderCanId,
+      DriveConstants.kBackRightChassisAngularOffset);
 
   // The gyro sensor
   private final AHRS m_gyro = new AHRS(NavXComType.kMXP_UART);

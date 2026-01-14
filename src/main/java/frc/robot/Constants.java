@@ -58,6 +58,11 @@ public final class Constants {
     public static final int kFrontRightTurningCanId = 14;
     public static final int kRearRightTurningCanId = 16;
 
+    public static final int kFrontLeftTurningEncoderCanId = 10;
+    public static final int kRearLeftTurningEncoderCanId = 12;
+    public static final int kFrontRightTurningEncoderCanId = 14;
+    public static final int kRearRightTurningEncoderCanId = 16;
+
     public static final boolean kGyroReversed = false;
   }
 
@@ -69,6 +74,8 @@ public final class Constants {
     public static final double kDrivingMotorReduction = 22.0;
     public static final double kDriveWheelFreeSpeedRps = (NeoMotorConstants.kFreeSpeedRps
         * kWheelCircumferenceMeters) / kDrivingMotorReduction;
+
+    public static final double kTurningMotorReduction = 22.0;
 
     public static final double kMaxSteerSpeed = Units.rotationsToRadians(10);
   }
