@@ -56,7 +56,7 @@ public class Drivetrain extends SubsystemBase {
 
   // Odometry class for tracking robot pose
   private final SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
-      DriveConstants.kDriveKinematics, m_gyro.getRotation2d(),
+      DriveConstants.kDriveKinematics, getGyroHeading(),
       new SwerveModulePosition[] { m_frontLeft.getPosition(), m_frontRight.getPosition(),
           m_rearLeft.getPosition(), m_rearRight.getPosition() });
 
@@ -79,9 +79,8 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // Update the odometry in the periodic block
-    m_odometry.update(m_gyro.getRotation2d(),
-        new SwerveModulePosition[] { m_frontLeft.getPosition(), m_frontRight.getPosition(),
-            m_rearLeft.getPosition(), m_rearRight.getPosition() });
+    m_odometry.update(getGyroHeading(), new SwerveModulePosition[] { m_frontLeft.getPosition(),
+        m_frontRight.getPosition(), m_rearLeft.getPosition(), m_rearRight.getPosition() });
   }
 
   /**
@@ -132,7 +131,7 @@ public class Drivetrain extends SubsystemBase {
    * @param pose The pose to which to set the odometry.
    */
   public void resetOdometry(Pose2d pose) {
-    m_odometry.resetPosition(m_gyro.getRotation2d(), getModulePositions(), pose);
+    m_odometry.resetPosition(getGyroHeading(), getModulePositions(), pose);
   }
 
   /**
@@ -151,7 +150,7 @@ public class Drivetrain extends SubsystemBase {
 
     if (fieldRelative) {
       Rotation2d headingForFieldRelative = DriverStation.isFMSAttached() ? getHeading()
-          : m_gyro.getRotation2d();
+          : getGyroHeading();
       chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot,
           headingForFieldRelative);
     } else {
@@ -248,7 +247,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   /**
-   * Creates a {@link Command} that resets the field relative controls.
+   * Creates a {@link Command} that resets the field-relative controls.
    * 
    * @return The command.
    */
@@ -262,12 +261,22 @@ public class Drivetrain extends SubsystemBase {
   }
 
   /**
-   * Gets the heading of the robot.
+   * Gets the field-relative heading of the robot.
    *
    * @return the robot's heading as a {@link Rotation2d}.
    */
   public Rotation2d getHeading() {
     return m_odometry.getPoseMeters().getRotation();
+  }
+
+  /**
+   * Gets the heading of the robot from the gyro directly. This may be offset from
+   * the field-relative heading.
+   *
+   * @return The gyro heading as a {@link Rotation2d}.
+   */
+  public Rotation2d getGyroHeading() {
+    return m_gyro.getRotation2d();
   }
 
   /**
