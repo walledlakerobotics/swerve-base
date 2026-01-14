@@ -79,8 +79,9 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // Update the odometry in the periodic block
-    m_odometry.update(m_gyro.getRotation2d(), new SwerveModulePosition[] { m_frontLeft.getPosition(),
-        m_frontRight.getPosition(), m_rearLeft.getPosition(), m_rearRight.getPosition() });
+    m_odometry.update(m_gyro.getRotation2d(),
+        new SwerveModulePosition[] { m_frontLeft.getPosition(), m_frontRight.getPosition(),
+            m_rearLeft.getPosition(), m_rearRight.getPosition() });
   }
 
   /**
@@ -98,9 +99,8 @@ public class Drivetrain extends SubsystemBase {
    * @return The current ChassisSpeeds of the robot.
    */
   public ChassisSpeeds getChassisSpeeds() {
-    ChassisSpeeds chassisSpeeds = DriveConstants.kDriveKinematics.toChassisSpeeds(
-        m_frontLeft.getState(), m_frontRight.getState(), m_rearLeft.getState(),
-        m_rearRight.getState());
+    ChassisSpeeds chassisSpeeds = DriveConstants.kDriveKinematics
+        .toChassisSpeeds(getModuleStates());
 
     chassisSpeeds.omegaRadiansPerSecond = getTurnRate().getRadians();
     return chassisSpeeds;
