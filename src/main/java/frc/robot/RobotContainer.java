@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,8 +25,7 @@ public class RobotContainer {
   private final Drivetrain m_robotDrive = new Drivetrain();
 
   // The driver's controller
-  XboxController m_driverController = new XboxController(
-      OIConstants.kDriverControllerPort);
+  XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -35,35 +33,28 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
-
-    // Configure default commands
-    m_robotDrive.setDefaultCommand(
-        // The left stick controls translation of the robot.
-        // Turning is controlled by the X axis of the right stick.
-        new RunCommand(() -> m_robotDrive.drive(
-            -MathUtil.applyDeadband(m_driverController.getLeftY(),
-                OIConstants.kDriveDeadband),
-            -MathUtil.applyDeadband(m_driverController.getLeftX(),
-                OIConstants.kDriveDeadband),
-            -MathUtil.applyDeadband(m_driverController.getRightX(),
-                OIConstants.kDriveDeadband),
-            true), m_robotDrive));
   }
 
   /**
    * Use this method to define your button->command mappings. Buttons can be
-   * created by instantiating a {@link edu.wpi.first.wpilibj.GenericHID} or one
-   * of its subclasses ({@link edu.wpi.first.wpilibj.Joystick} or
+   * created by instantiating a {@link edu.wpi.first.wpilibj.GenericHID} or one of
+   * its subclasses ({@link edu.wpi.first.wpilibj.Joystick} or
    * {@link XboxController}), and then calling passing it to a
    * {@link JoystickButton}.
    */
   private void configureButtonBindings() {
+    // Configure drive control
+    m_robotDrive.setDefaultCommand(
+        // The left stick controls translation of the robot.
+        // Turning is controlled by the X axis of the right stick.
+        m_robotDrive.drive(m_driverController::getLeftY, m_driverController::getLeftX,
+            m_driverController::getRightX, true));
+
     new JoystickButton(m_driverController, Button.kR1.value)
         .whileTrue(new RunCommand(() -> m_robotDrive.setX(), m_robotDrive));
 
     new JoystickButton(m_driverController, XboxController.Button.kStart.value)
-        .onTrue(
-            new InstantCommand(() -> m_robotDrive.zeroHeading(), m_robotDrive));
+        .onTrue(new InstantCommand(() -> m_robotDrive.zeroHeading(), m_robotDrive));
   }
 
   /**

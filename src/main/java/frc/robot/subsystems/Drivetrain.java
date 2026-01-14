@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
@@ -14,6 +16,7 @@ import com.studica.frc.AHRS.NavXComType;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -22,10 +25,12 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
+import frc.robot.Constants.OIConstants;
 
 public class Drivetrain extends SubsystemBase {
   // Create SwerveModules
@@ -120,34 +125,29 @@ public class Drivetrain extends SubsystemBase {
   /**
    * Method to drive the robot using joystick info.
    *
-   * @param xSpeed        Speed of the robot in the x direction (forward) from -1
-   *                      to 1.
-   * @param ySpeed        Speed of the robot in the y direction (sideways) from -1
-   *                      to 1.
-   * @param rot           Angular rate of the robot from -1 to 1.
+   * @param xSpeed        Speed of the robot in the x direction (forward) in
+   *                      meters per second.
+   * @param ySpeed        Speed of the robot in the y direction (sideways) in
+   *                      meters per second.
+   * @param rot           Angular rate of the robot in radians per second.
    * @param fieldRelative Whether the provided x and y speeds are relative to the
    *                      field.
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-    // Convert the commanded speeds into the correct units for the drivetrain
-    double xSpeedDelivered = xSpeed * DriveConstants.kMaxSpeedMetersPerSecond;
-    double ySpeedDelivered = ySpeed * DriveConstants.kMaxSpeedMetersPerSecond;
-    double rotDelivered = rot * DriveConstants.kMaxAngularSpeed;
-
     ChassisSpeeds chassisSpeeds;
 
     if (fieldRelative) {
-      chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered,
-          rotDelivered, getHeading());
+      chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, getHeading());
     } else {
-      chassisSpeeds = new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered);
+      chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, rot);
     }
 
     drive(chassisSpeeds);
   }
 
   /**
-   * Method to drive the robot using a ChassisSpeeds object.
+   * Method to drive the robot using a ChassisSpeeds object. This handles the
+   * inversion of joystick inputs.
    *
    * @param chassisSpeeds The desired chassis speeds.
    */
@@ -156,6 +156,38 @@ public class Drivetrain extends SubsystemBase {
         TimedRobot.kDefaultPeriod);
 
     setModuleStates(m_previousSetpoint.moduleStates());
+  }
+
+  /**
+   * Creates a {@link Command} to drive the robot using joystick info. Handles
+   * deadbands and inversion of joystick inputs.
+   *
+   * @param xSpeed        Supplier of the speed of the robot in the x direction
+   *                      (forward) from -1 to 1.
+   * @param ySpeed        Supplier of the speed of the robot in the y direction
+   *                      (sideways) from -1 to 1.
+   * @param rot           Supplier of the angular rate of the robot from -1 to 1.
+   * @param fieldRelative Whether the provided x and y speeds are relative to the
+   *                      field.
+   */
+  public Command drive(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
+      DoubleSupplier rotSupplier, boolean fieldRelative) {
+    return run(() -> {
+      double xSpeed = xSpeedSupplier.getAsDouble();
+      double ySpeed = ySpeedSupplier.getAsDouble();
+      double rot = rotSupplier.getAsDouble();
+
+      xSpeed = -MathUtil.applyDeadband(xSpeed, OIConstants.kDriveDeadband);
+      ySpeed = -MathUtil.applyDeadband(ySpeed, OIConstants.kDriveDeadband);
+      rot = -MathUtil.applyDeadband(rot, OIConstants.kDriveDeadband);
+
+      // Convert the commanded speeds into the correct units for the drivetrain
+      xSpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
+      ySpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
+      rot *= DriveConstants.kMaxAngularSpeed;
+
+      drive(xSpeed, ySpeed, rot, fieldRelative);
+    });
   }
 
   /**
