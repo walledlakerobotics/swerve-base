@@ -117,15 +117,22 @@ public class Drivetrain extends SubsystemBase {
   }
 
   /**
+   * Gets the current positions of all the swerve modules.
+   * 
+   * @return The current SwerveModulePositions.
+   */
+  public SwerveModulePosition[] getModulePositions() {
+    return new SwerveModulePosition[] { m_frontLeft.getPosition(), m_frontRight.getPosition(),
+        m_rearLeft.getPosition(), m_rearRight.getPosition() };
+  }
+
+  /**
    * Resets the odometry to the specified pose.
    *
    * @param pose The pose to which to set the odometry.
    */
   public void resetOdometry(Pose2d pose) {
-    m_odometry.resetPosition(
-        m_gyro.getRotation2d(), new SwerveModulePosition[] { m_frontLeft.getPosition(),
-            m_frontRight.getPosition(), m_rearLeft.getPosition(), m_rearRight.getPosition() },
-        pose);
+    m_odometry.resetPosition(m_gyro.getRotation2d(), getModulePositions(), pose);
   }
 
   /**
