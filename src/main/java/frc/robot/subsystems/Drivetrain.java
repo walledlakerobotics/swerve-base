@@ -106,6 +106,11 @@ public class Drivetrain extends SubsystemBase {
     return chassisSpeeds;
   }
 
+  /**
+   * Gets the current states of all the swerve modules.
+   * 
+   * @return The current SwerveModuleStates.
+   */
   public SwerveModuleState[] getModuleStates() {
     return new SwerveModuleState[] { m_frontLeft.getState(), m_frontRight.getState(),
         m_rearLeft.getState(), m_rearRight.getState() };
