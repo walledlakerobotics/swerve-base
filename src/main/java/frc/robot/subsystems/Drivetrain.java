@@ -142,8 +142,7 @@ public class Drivetrain extends SubsystemBase {
    * @param chassisSpeeds The desired chassis speeds.
    */
   public void drive(ChassisSpeeds chassisSpeeds) {
-    SwerveModuleState[] swerveModuleStates =
-        DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
+    SwerveModuleState[] swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
 
     setModuleStates(swerveModuleStates);
   }
