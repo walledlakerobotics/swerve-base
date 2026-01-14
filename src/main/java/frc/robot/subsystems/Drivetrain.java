@@ -44,7 +44,7 @@ public class Drivetrain extends SubsystemBase {
       m_gyro.getRotation2d(), new SwerveModulePosition[] { m_frontLeft.getPosition(),
           m_frontRight.getPosition(), m_rearLeft.getPosition(), m_rearRight.getPosition() });
 
-  /** Creates a new DriveSubsystem. */
+  /** Creates a new Drivetrain. */
   public Drivetrain() {
     // Report swerve drive to the HAL
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_Other);
