@@ -24,6 +24,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -78,7 +79,7 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // Update the odometry in the periodic block
-    m_odometry.update(getHeading(), new SwerveModulePosition[] { m_frontLeft.getPosition(),
+    m_odometry.update(m_gyro.getRotation2d(), new SwerveModulePosition[] { m_frontLeft.getPosition(),
         m_frontRight.getPosition(), m_rearLeft.getPosition(), m_rearRight.getPosition() });
   }
 
@@ -117,7 +118,7 @@ public class Drivetrain extends SubsystemBase {
    */
   public void resetOdometry(Pose2d pose) {
     m_odometry.resetPosition(
-        getHeading(), new SwerveModulePosition[] { m_frontLeft.getPosition(),
+        m_gyro.getRotation2d(), new SwerveModulePosition[] { m_frontLeft.getPosition(),
             m_frontRight.getPosition(), m_rearLeft.getPosition(), m_rearRight.getPosition() },
         pose);
   }
@@ -137,7 +138,10 @@ public class Drivetrain extends SubsystemBase {
     ChassisSpeeds chassisSpeeds;
 
     if (fieldRelative) {
-      chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, getHeading());
+      Rotation2d headingForFieldRelative = DriverStation.isFMSAttached() ? getHeading()
+          : m_gyro.getRotation2d();
+      chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot,
+          headingForFieldRelative);
     } else {
       chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, rot);
     }
@@ -191,7 +195,8 @@ public class Drivetrain extends SubsystemBase {
   }
 
   /**
-   * Creates a {@link Command} that sets the wheels into an X formation to prevent movement.
+   * Creates a {@link Command} that sets the wheels into an X formation to prevent
+   * movement.
    * 
    * @return The command.
    */
@@ -230,12 +235,18 @@ public class Drivetrain extends SubsystemBase {
     resetOdometry(currentPose);
   }
 
-  /** Zeroes the heading of the robot. */
-  public void zeroHeading() {
-    Pose2d currentPose = getPose();
-    m_gyro.reset();
+  /**
+   * Creates a {@link Command} that resets the field relative controls.
+   * 
+   * @return The command.
+   */
+  public Command resetFieldRelative() {
+    return runOnce(() -> {
+      Pose2d currentPose = getPose();
+      m_gyro.reset();
 
-    resetOdometry(currentPose);
+      resetOdometry(currentPose);
+    });
   }
 
   /**
@@ -244,7 +255,7 @@ public class Drivetrain extends SubsystemBase {
    * @return the robot's heading as a {@link Rotation2d}.
    */
   public Rotation2d getHeading() {
-    return m_gyro.getRotation2d();
+    return m_odometry.getPoseMeters().getRotation();
   }
 
   /**
