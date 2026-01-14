@@ -63,8 +63,6 @@ public final class Constants {
     public static final int kFrontRightTurningEncoderCanId = 14;
     public static final int kRearRightTurningEncoderCanId = 16;
 
-    public static final boolean kGyroReversed = false;
-
     public static final RobotConfig kRobotConfig;
 
     static {
