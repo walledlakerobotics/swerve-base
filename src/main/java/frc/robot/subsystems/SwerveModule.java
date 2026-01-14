@@ -12,6 +12,8 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -120,5 +122,17 @@ public class SwerveModule {
   /** Zeroes all the SwerveModule encoders. */
   public void resetEncoders() {
     m_drivingEncoder.setPosition(0);
+  }
+
+  /**
+   * Sets the idle mode for both motors in the swerve module.
+   * @param idleMode The desired idle mode (Brake or Coast).
+   */
+  public void setIdleMode(IdleMode idleMode) {
+    SparkMaxConfig config = new SparkMaxConfig();
+    config.idleMode(idleMode);
+
+    m_drivingSpark.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    m_turningSpark.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 }

@@ -10,6 +10,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
@@ -74,6 +76,10 @@ public class Drivetrain extends SubsystemBase {
 
     m_previousSetpoint = new SwerveSetpoint(getChassisSpeeds(), getModuleStates(),
         DriveFeedforwards.zeros(DriveConstants.kRobotConfig.numModules));
+
+    RobotModeTriggers.disabled().and(() -> !DriverStation.isFMSAttached())
+        .onTrue(setIdleMode(IdleMode.kCoast))
+        .onFalse(setIdleMode(IdleMode.kBrake));
   }
 
   @Override
@@ -257,6 +263,21 @@ public class Drivetrain extends SubsystemBase {
       m_gyro.reset();
 
       resetOdometry(currentPose);
+    });
+  }
+
+  /**
+   * Creates a {@link Command} that sets the idle mode for all swerve modules.
+   * 
+   * @param idleMode The desired idle mode (Brake or Coast).
+   * @return The command.
+   */
+  public Command setIdleMode(IdleMode idleMode) {
+    return runOnce(() -> {
+      m_frontLeft.setIdleMode(idleMode);
+      m_frontRight.setIdleMode(idleMode);
+      m_rearLeft.setIdleMode(idleMode);
+      m_rearRight.setIdleMode(idleMode);
     });
   }
 
