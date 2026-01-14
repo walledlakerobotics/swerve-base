@@ -64,6 +64,16 @@ public final class Constants {
     public static final int kRearRightTurningEncoderCanId = 16;
 
     public static final boolean kGyroReversed = false;
+
+    public static final RobotConfig kRobotConfig;
+
+    static {
+      try {
+        kRobotConfig = RobotConfig.fromGUISettings();
+      } catch (Exception e) {
+        throw new RuntimeException("Failed to load robot configuration", e);
+      }
+    }
   }
 
   public static final class ModuleConstants {
@@ -88,16 +98,6 @@ public final class Constants {
   public static final class AutoConstants {
     public static final PIDConstants kTranslationConstants = new PIDConstants(1, 0, 0);
     public static final PIDConstants kRotationConstants = new PIDConstants(1, 0, 0);
-
-    public static final RobotConfig kRobotConfig;
-
-    static {
-      try {
-        kRobotConfig = RobotConfig.fromGUISettings();
-      } catch (Exception e) {
-        throw new RuntimeException("Failed to load robot configuration", e);
-      }
-    }
 
     public static final PathFollowingController kPathFollowingController = new PPHolonomicDriveController(
         kTranslationConstants, kRotationConstants);

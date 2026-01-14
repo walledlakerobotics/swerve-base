@@ -55,7 +55,7 @@ public class Drivetrain extends SubsystemBase {
           m_rearLeft.getPosition(), m_rearRight.getPosition() });
 
   private final SwerveSetpointGenerator m_setpointGenerator = new SwerveSetpointGenerator(
-      AutoConstants.kRobotConfig, ModuleConstants.kMaxSteerSpeed);
+      DriveConstants.kRobotConfig, ModuleConstants.kMaxSteerSpeed);
   private SwerveSetpoint m_previousSetpoint;
 
   /** Creates a new Drivetrain. */
@@ -64,10 +64,10 @@ public class Drivetrain extends SubsystemBase {
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_Other);
 
     AutoBuilder.configure(this::getPose, this::resetOdometry, this::getChassisSpeeds, this::drive,
-        AutoConstants.kPathFollowingController, AutoConstants.kRobotConfig, () -> false, this);
+        AutoConstants.kPathFollowingController, DriveConstants.kRobotConfig, () -> false, this);
 
     m_previousSetpoint = new SwerveSetpoint(getChassisSpeeds(), getModuleStates(),
-        DriveFeedforwards.zeros(AutoConstants.kRobotConfig.numModules));
+        DriveFeedforwards.zeros(DriveConstants.kRobotConfig.numModules));
   }
 
   @Override
