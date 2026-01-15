@@ -86,7 +86,9 @@ public final class Constants {
 
     public static final double kTurningMotorReduction = 22.0;
 
-    public static final double kMaxSteerSpeed = Units.rotationsToRadians(10);
+    // TODO: Check motor type
+    public static final double kMaxSteerSpeedRadPerSec = 0.9
+        * Units.rotationsToRadians(NeoMotorConstants.kFreeSpeedRps / kTurningMotorReduction);
   }
 
   public static final class OIConstants {
