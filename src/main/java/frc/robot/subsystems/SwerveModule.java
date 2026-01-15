@@ -12,8 +12,8 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -39,7 +39,8 @@ public class SwerveModule {
    * Constructs a SwerveModule and configures the driving and turning motor,
    * CANcoder, and PID controller.
    */
-  public SwerveModule(int drivingCANId, int turningCANId, int turningEncoderId, double chassisAngularOffset) {
+  public SwerveModule(int drivingCANId, int turningCANId, int turningEncoderId,
+      double chassisAngularOffset) {
     m_drivingSpark = new SparkMax(drivingCANId, MotorType.kBrushless);
     m_turningSpark = new SparkMax(turningCANId, MotorType.kBrushless);
 
@@ -65,7 +66,8 @@ public class SwerveModule {
   }
 
   /**
-   * Gets the current angle of the module.
+   * Gets the current angle of the module. Also ensures the turning feedback
+   * encoder is correctly updated with values from the CANCoder.
    * 
    * @return The current angle of the module.
    */
@@ -96,8 +98,7 @@ public class SwerveModule {
   public SwerveModulePosition getPosition() {
     // Apply chassis angular offset to the encoder position to get the position
     // relative to the chassis.
-    return new SwerveModulePosition(
-        m_drivingEncoder.getPosition(),
+    return new SwerveModulePosition(m_drivingEncoder.getPosition(),
         getAngle().minus(m_chassisAngularOffset));
   }
 
@@ -116,8 +117,10 @@ public class SwerveModule {
     correctedDesiredState.optimize(getAngle());
 
     // Command driving and turning SPARKS towards their respective setpoints.
-    m_drivingClosedLoopController.setSetpoint(correctedDesiredState.speedMetersPerSecond, ControlType.kVelocity);
-    m_turningClosedLoopController.setSetpoint(correctedDesiredState.angle.getRadians(), ControlType.kPosition);
+    m_drivingClosedLoopController.setSetpoint(correctedDesiredState.speedMetersPerSecond,
+        ControlType.kVelocity);
+    m_turningClosedLoopController.setSetpoint(correctedDesiredState.angle.getRadians(),
+        ControlType.kPosition);
 
     m_desiredState = desiredState;
   }
@@ -129,13 +132,16 @@ public class SwerveModule {
 
   /**
    * Sets the idle mode for both motors in the swerve module.
+   * 
    * @param idleMode The desired idle mode (Brake or Coast).
    */
   public void setIdleMode(IdleMode idleMode) {
     SparkMaxConfig config = new SparkMaxConfig();
     config.idleMode(idleMode);
 
-    m_drivingSpark.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-    m_turningSpark.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    m_drivingSpark.configure(config, ResetMode.kNoResetSafeParameters,
+        PersistMode.kNoPersistParameters);
+    m_turningSpark.configure(config, ResetMode.kNoResetSafeParameters,
+        PersistMode.kNoPersistParameters);
   }
 }
