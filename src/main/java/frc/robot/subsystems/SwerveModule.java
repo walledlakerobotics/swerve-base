@@ -33,7 +33,7 @@ public class SwerveModule {
   private final SparkClosedLoopController m_turningClosedLoopController;
 
   private Rotation2d m_chassisAngularOffset = Rotation2d.kZero;
-  private SwerveModuleState m_desiredState = new SwerveModuleState(0.0, new Rotation2d());
+  private SwerveModuleState m_desiredState = new SwerveModuleState(0.0, Rotation2d.kZero);
 
   /**
    * Constructs a SwerveModule and configures the driving and turning motor,
