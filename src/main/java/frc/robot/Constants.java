@@ -58,6 +58,7 @@ public final class Constants {
     public static final int kFrontRightTurningCanId = 14;
     public static final int kRearRightTurningCanId = 16;
 
+    // CANCoder CAN IDs
     public static final int kFrontLeftTurningEncoderCanId = 10;
     public static final int kRearLeftTurningEncoderCanId = 12;
     public static final int kFrontRightTurningEncoderCanId = 14;
