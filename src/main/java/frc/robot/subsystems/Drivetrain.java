@@ -139,7 +139,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   /**
-   * Method to drive the robot using joystick info.
+   * Method to drive the robot using speed info.
    *
    * @param xSpeed        Speed of the robot in the x direction (forward) in
    *                      meters per second.
@@ -165,8 +165,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   /**
-   * Method to drive the robot using a ChassisSpeeds object. This handles the
-   * inversion of joystick inputs.
+   * Method to drive the robot using a robot-relative {@link ChassisSpeeds} object.
    *
    * @param chassisSpeeds The desired chassis speeds.
    */
@@ -188,6 +187,7 @@ public class Drivetrain extends SubsystemBase {
    * @param rot           Supplier of the angular rate of the robot from -1 to 1.
    * @param fieldRelative Whether the provided x and y speeds are relative to the
    *                      field.
+   * @return The command.
    */
   public Command drive(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
       DoubleSupplier rotSupplier, boolean fieldRelative) {
