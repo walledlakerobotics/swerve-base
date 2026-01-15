@@ -36,10 +36,8 @@ public class SwerveModule {
   private SwerveModuleState m_desiredState = new SwerveModuleState(0.0, new Rotation2d());
 
   /**
-   * Constructs a MAXSwerveModule and configures the driving and turning motor,
-   * encoder, and PID controller. This configuration is specific to the REV
-   * MAXSwerve Module built with NEOs, SPARKS MAX, and a Through Bore
-   * Encoder.
+   * Constructs a SwerveModule and configures the driving and turning motor,
+   * CANcoder, and PID controller.
    */
   public SwerveModule(int drivingCANId, int turningCANId, int turningEncoderId, double chassisAngularOffset) {
     m_drivingSpark = new SparkMax(drivingCANId, MotorType.kBrushless);
@@ -66,11 +64,16 @@ public class SwerveModule {
     m_drivingEncoder.setPosition(0);
   }
 
+  /**
+   * Gets the current angle of the module.
+   * 
+   * @return The current angle of the module.
+   */
   private Rotation2d getAngle() {
     double rotations = m_turningEncoder.getAbsolutePosition().getValueAsDouble();
     m_turningFeedbackEncoder.setPosition(rotations);
 
-    return Rotation2d.fromRotations(m_turningFeedbackEncoder.getPosition());
+    return Rotation2d.fromRotations(rotations);
   }
 
   /**
