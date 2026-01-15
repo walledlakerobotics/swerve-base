@@ -63,8 +63,9 @@ public class Drivetrain extends SubsystemBase {
           m_rearLeft.getPosition(), m_rearRight.getPosition() });
 
   private final SwerveSetpointGenerator m_setpointGenerator = new SwerveSetpointGenerator(
-      DriveConstants.kRobotConfig, ModuleConstants.kMaxSteerSpeed);
-  private SwerveSetpoint m_previousSetpoint;
+      DriveConstants.kRobotConfig, ModuleConstants.kMaxSteerSpeedRadPerSec);
+  private SwerveSetpoint m_previousSetpoint = new SwerveSetpoint(getChassisSpeeds(),
+      getModuleStates(), DriveFeedforwards.zeros(DriveConstants.kRobotConfig.numModules));
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {
@@ -73,9 +74,6 @@ public class Drivetrain extends SubsystemBase {
 
     AutoBuilder.configure(this::getPose, this::resetOdometry, this::getChassisSpeeds, this::drive,
         AutoConstants.kPathFollowingController, DriveConstants.kRobotConfig, () -> false, this);
-
-    m_previousSetpoint = new SwerveSetpoint(getChassisSpeeds(), getModuleStates(),
-        DriveFeedforwards.zeros(DriveConstants.kRobotConfig.numModules));
 
     RobotModeTriggers.disabled().and(() -> !DriverStation.isFMSAttached())
         .onTrue(setIdleMode(IdleMode.kCoast))
