@@ -4,10 +4,13 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.controllers.PathFollowingController;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -27,13 +30,13 @@ public final class Constants {
   public static final class DriveConstants {
     // Driving Parameters - Note that these are not the maximum capable speeds
     // of the robot, rather the allowed maximum speeds
-    public static final double kMaxSpeedMetersPerSecond = 4.8;
+    public static final double kMaxSpeedMetersPerSecond = 4.47;
     public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
 
     // Chassis configuration
-    public static final double kTrackWidth = Units.inchesToMeters(26.5);
+    public static final double kTrackWidth = Units.inchesToMeters(23);
     // Distance between centers of right and left wheels on robot
-    public static final double kWheelBase = Units.inchesToMeters(26.5);
+    public static final double kWheelBase = Units.inchesToMeters(23.125);
     // Distance between front and back wheels on robot
     public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
         new Translation2d(kWheelBase / 2, kTrackWidth / 2),
@@ -47,22 +50,23 @@ public final class Constants {
     public static final double kBackLeftChassisAngularOffset = Math.PI;
     public static final double kBackRightChassisAngularOffset = Math.PI / 2;
 
-    // SPARK MAX CAN IDs
-    public static final int kFrontLeftDrivingCanId = 11;
-    public static final int kRearLeftDrivingCanId = 13;
-    public static final int kFrontRightDrivingCanId = 15;
-    public static final int kRearRightDrivingCanId = 17;
+    // // SPARK MAX CAN IDs
+    public static final int kFrontLeftDrivingCanId = 8;
+    public static final int kRearLeftDrivingCanId = 6;
+    public static final int kFrontRightDrivingCanId = 2;
+    public static final int kRearRightDrivingCanId = 4;
 
-    public static final int kFrontLeftTurningCanId = 10;
-    public static final int kRearLeftTurningCanId = 12;
-    public static final int kFrontRightTurningCanId = 14;
-    public static final int kRearRightTurningCanId = 16;
+    public static final int kFrontLeftTurningCanId = 7;
+    public static final int kRearLeftTurningCanId = 5;
+    public static final int kFrontRightTurningCanId = 1;
+    public static final int kRearRightTurningCanId = 3;
 
-    // CANCoder CAN IDs
-    public static final int kFrontLeftTurningEncoderCanId = 10;
-    public static final int kRearLeftTurningEncoderCanId = 12;
-    public static final int kFrontRightTurningEncoderCanId = 14;
-    public static final int kRearRightTurningEncoderCanId = 16;
+    // Encoder CAN Ids
+    public static final int kFrontLeftTurningEncoderId = 14;
+    public static final int kFrontRightTurningEncoderId = 12;
+    public static final int kRearLeftTurningEncoderId = 13;
+    public static final int kRearRightTurningEncoderId = 11;
+
 
     public static final RobotConfig kRobotConfig;
 
@@ -77,18 +81,36 @@ public final class Constants {
 
   public static final class ModuleConstants {
     // Calculations required for driving motor conversion factors and feed forward
-    public static final double kWheelDiameterMeters = 0.0762;
+    public static final double kWheelDiameterMeters = Units.inchesToMeters(4);
+    public static final double kWheelRadiusMeters = kWheelDiameterMeters / 2;
     public static final double kWheelCircumferenceMeters = kWheelDiameterMeters * Math.PI;
 
-    public static final double kDrivingMotorReduction = 22.0;
+    public static final double kDrivingMotorReduction = 6.75;
     public static final double kDriveWheelFreeSpeedRps = (NeoMotorConstants.kFreeSpeedRps
         * kWheelCircumferenceMeters) / kDrivingMotorReduction;
 
-    public static final double kTurningMotorReduction = 22.0;
+    public static final double kTurningMotorReduction = 6.75;
 
     // TODO: Check motor type
     public static final double kMaxSteerSpeedRadPerSec = 0.9
         * Units.rotationsToRadians(NeoMotorConstants.kFreeSpeedRps / kTurningMotorReduction);
+
+    
+    public static final IdleMode kDrivingMotorIdleMode = IdleMode.kBrake;
+    public static final IdleMode kTurningMotorIdleMode = IdleMode.kBrake;
+    
+    public static final int kDrivingMotorCurrentLimit = 40; // amps
+    public static final int kTurningMotorCurrentLimit = 35; // amps
+
+    public static final boolean kLeftFrontInverted = true;
+    public static final boolean kLeftRearInverted = true;
+
+    public static final boolean kRightFrontInverted = true;
+    public static final boolean kRightRearInverted = true;
+
+    public static final boolean kTurningMotorsInverted = true;
+    public static final boolean kTurningEncoderInverted = false;
+
   }
 
   public static final class OIConstants {

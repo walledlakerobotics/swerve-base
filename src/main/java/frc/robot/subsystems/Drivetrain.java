@@ -38,19 +38,19 @@ import frc.robot.Constants.OIConstants;
 public class Drivetrain extends SubsystemBase {
   // Create SwerveModules
   private final SwerveModule m_frontLeft = new SwerveModule(DriveConstants.kFrontLeftDrivingCanId,
-      DriveConstants.kFrontLeftTurningCanId, DriveConstants.kFrontLeftTurningEncoderCanId,
+      DriveConstants.kFrontLeftTurningCanId, DriveConstants.kFrontLeftTurningEncoderId,
       DriveConstants.kFrontLeftChassisAngularOffset);
 
   private final SwerveModule m_frontRight = new SwerveModule(DriveConstants.kFrontRightDrivingCanId,
-      DriveConstants.kFrontRightTurningCanId, DriveConstants.kFrontRightTurningEncoderCanId,
+      DriveConstants.kFrontRightTurningCanId, DriveConstants.kFrontRightTurningEncoderId,
       DriveConstants.kFrontRightChassisAngularOffset);
 
   private final SwerveModule m_rearLeft = new SwerveModule(DriveConstants.kRearLeftDrivingCanId,
-      DriveConstants.kRearLeftTurningCanId, DriveConstants.kRearLeftTurningEncoderCanId,
+      DriveConstants.kRearLeftTurningCanId, DriveConstants.kRearLeftTurningEncoderId,
       DriveConstants.kBackLeftChassisAngularOffset);
 
   private final SwerveModule m_rearRight = new SwerveModule(DriveConstants.kRearRightDrivingCanId,
-      DriveConstants.kRearRightTurningCanId, DriveConstants.kRearRightTurningEncoderCanId,
+      DriveConstants.kRearRightTurningCanId, DriveConstants.kRearRightTurningEncoderId,
       DriveConstants.kBackRightChassisAngularOffset);
 
   // The gyro sensor
