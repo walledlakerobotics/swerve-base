@@ -89,7 +89,7 @@ public final class Constants {
     public static final double kDriveWheelFreeSpeedRps = (NeoMotorConstants.kFreeSpeedRps
         * kWheelCircumferenceMeters) / kDrivingMotorReduction;
 
-    public static final double kTurningMotorReduction = 6.75;
+    public static final double kTurningMotorReduction = 150.0 / 7;
 
     // TODO: Check motor type
     public static final double kMaxSteerSpeedRadPerSec = 0.9
