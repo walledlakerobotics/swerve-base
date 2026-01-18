@@ -4,12 +4,10 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.controllers.PathFollowingController;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -102,12 +100,8 @@ public final class Constants {
     public static final int kDrivingMotorCurrentLimit = 40; // amps
     public static final int kTurningMotorCurrentLimit = 35; // amps
 
-    public static final boolean kLeftFrontInverted = true;
-    public static final boolean kLeftRearInverted = true;
-
-    public static final boolean kRightFrontInverted = true;
-    public static final boolean kRightRearInverted = true;
-
+      
+    public static final boolean kDrivingMotorsInverted = true;
     public static final boolean kTurningMotorsInverted = true;
     public static final boolean kTurningEncoderInverted = false;
 
