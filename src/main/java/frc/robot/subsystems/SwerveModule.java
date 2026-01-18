@@ -119,7 +119,7 @@ public class SwerveModule {
     // Command driving and turning SPARKS towards their respective setpoints.
     m_drivingClosedLoopController.setSetpoint(correctedDesiredState.speedMetersPerSecond,
         ControlType.kVelocity);
-    m_turningClosedLoopController.setSetpoint(correctedDesiredState.angle.getRadians(),
+    m_turningClosedLoopController.setSetpoint(correctedDesiredState.angle.getRotations(),
         ControlType.kPosition);
 
     m_desiredState = desiredState;
