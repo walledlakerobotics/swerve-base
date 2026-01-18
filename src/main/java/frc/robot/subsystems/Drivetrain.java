@@ -256,7 +256,7 @@ public class Drivetrain extends SubsystemBase {
    * @return The command.
    */
   public Command resetFieldRelative() {
-    return runOnce(() -> {
+    return Commands.runOnce(() -> {
       Pose2d currentPose = getPose();
       m_gyro.reset();
 
