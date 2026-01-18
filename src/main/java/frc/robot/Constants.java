@@ -65,7 +65,6 @@ public final class Constants {
     public static final int kRearLeftTurningEncoderId = 13;
     public static final int kRearRightTurningEncoderId = 11;
 
-
     public static final RobotConfig kRobotConfig;
 
     static {
@@ -89,18 +88,15 @@ public final class Constants {
 
     public static final double kTurningMotorReduction = 150.0 / 7;
 
-    // TODO: Check motor type
     public static final double kMaxSteerSpeedRadPerSec = 0.9
         * Units.rotationsToRadians(NeoMotorConstants.kFreeSpeedRps / kTurningMotorReduction);
 
-    
     public static final IdleMode kDrivingMotorIdleMode = IdleMode.kBrake;
     public static final IdleMode kTurningMotorIdleMode = IdleMode.kBrake;
-    
+
     public static final int kDrivingMotorCurrentLimit = 40; // amps
     public static final int kTurningMotorCurrentLimit = 35; // amps
 
-      
     public static final boolean kDrivingMotorsInverted = true;
     public static final boolean kTurningMotorsInverted = true;
     public static final boolean kTurningEncoderInverted = false;

@@ -23,7 +23,8 @@ public class RobotContainer {
   private final Drivetrain m_robotDrive = new Drivetrain();
 
   // The driver's controller
-  CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
+  CommandXboxController m_driverController = new CommandXboxController(
+      OIConstants.kDriverControllerPort);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -48,11 +49,9 @@ public class RobotContainer {
         m_robotDrive.drive(m_driverController::getLeftY, m_driverController::getLeftX,
             m_driverController::getRightX, true));
 
-    m_driverController.rightBumper()
-        .whileTrue(m_robotDrive.setX());
+    m_driverController.rightBumper().whileTrue(m_robotDrive.setX());
 
-    m_driverController.leftBumper()
-        .onTrue(m_robotDrive.resetFieldRelative());
+    m_driverController.leftBumper().onTrue(m_robotDrive.resetFieldRelative());
   }
 
   /**
