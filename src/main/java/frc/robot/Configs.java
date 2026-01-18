@@ -19,6 +19,7 @@ public static final class SwerveModule {
         double drivingVelocityFeedForward = nominalVoltage / ModuleConstants.kDriveWheelFreeSpeedRps;
 
         drivingConfig
+            .inverted(ModuleConstants.kDrivingMotorsInverted)
             .idleMode(ModuleConstants.kDrivingMotorIdleMode)
             .smartCurrentLimit(ModuleConstants.kDrivingMotorCurrentLimit);
         drivingConfig.encoder
