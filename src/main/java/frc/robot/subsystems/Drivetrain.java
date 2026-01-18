@@ -282,7 +282,7 @@ public class Drivetrain extends SubsystemBase {
   /**
    * Gets the field-relative heading of the robot.
    *
-   * @return the robot's heading as a {@link Rotation2d}.
+   * @return The robot's heading as a {@link Rotation2d}.
    */
   public Rotation2d getHeading() {
     return m_odometry.getPoseMeters().getRotation();
