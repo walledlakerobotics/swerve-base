@@ -51,7 +51,7 @@ public class RobotContainer {
     m_driverController.rightBumper()
         .whileTrue(m_robotDrive.setX());
 
-    m_driverController.start()
+    m_driverController.leftBumper()
         .onTrue(m_robotDrive.resetFieldRelative());
   }
 
