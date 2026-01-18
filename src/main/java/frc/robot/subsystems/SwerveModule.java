@@ -4,7 +4,11 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.pathplanner.lib.config.ModuleConfig;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -19,6 +23,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.Configs;
+import frc.robot.Constants.ModuleConstants;
 
 public class SwerveModule {
   private final SparkMax m_drivingSpark;
@@ -59,6 +64,15 @@ public class SwerveModule {
         PersistMode.kPersistParameters);
 
     m_turningEncoder = new CANcoder(turningEncoderId);
+
+    MagnetSensorConfigs turningEncoderConfig = new MagnetSensorConfigs();
+    m_turningEncoder.getConfigurator().refresh(turningEncoderConfig);
+
+    turningEncoderConfig.withSensorDirection(
+        ModuleConstants.kTurningEncoderInverted ? SensorDirectionValue.Clockwise_Positive
+            : SensorDirectionValue.CounterClockwise_Positive);
+
+    m_turningEncoder.getConfigurator().apply(turningEncoderConfig);
 
     m_chassisAngularOffset = Rotation2d.fromRadians(chassisAngularOffset);
     m_desiredState.angle = getAngle();
