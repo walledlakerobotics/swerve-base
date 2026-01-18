@@ -28,6 +28,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.AutoConstants;
@@ -261,7 +262,7 @@ public class Drivetrain extends SubsystemBase {
       m_gyro.reset();
 
       resetOdometry(currentPose);
-    });
+    }).ignoringDisable(true);
   }
 
   /**
@@ -271,12 +272,12 @@ public class Drivetrain extends SubsystemBase {
    * @return The command.
    */
   public Command setIdleMode(IdleMode idleMode) {
-    return runOnce(() -> {
+    return Commands.runOnce(() -> {
       m_frontLeft.setIdleMode(idleMode);
       m_frontRight.setIdleMode(idleMode);
       m_rearLeft.setIdleMode(idleMode);
       m_rearRight.setIdleMode(idleMode);
-    });
+    }).ignoringDisable(true);
   }
 
   /**
