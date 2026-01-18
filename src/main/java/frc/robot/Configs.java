@@ -27,7 +27,8 @@ public final class Configs {
           .velocityConversionFactor(drivingFactor / 60.0); // meters per second
       drivingConfig.closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-          .pid(0.04, 0, 0).outputRange(-1, 1)
+          .pid(0.04, 0, 0)
+          .outputRange(-1, 1)
           .feedForward
               .kV(drivingVelocityFeedForward);
 
@@ -35,11 +36,9 @@ public final class Configs {
           .inverted(ModuleConstants.kTurningMotorsInverted)
           .idleMode(ModuleConstants.kTurningMotorIdleMode)
           .smartCurrentLimit(ModuleConstants.kTurningMotorCurrentLimit);
-
       turningConfig.encoder
           .positionConversionFactor(turningFactor) // rotations
           .velocityConversionFactor(turningFactor / 60.0); // rotations per second
-
       turningConfig.closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
           .pid(3.5, 0, 0.5)
