@@ -50,7 +50,7 @@ public static final class SwerveModule {
           // to 10 degrees will go through 0 rather than the other direction which is a
           // longer route.
             .positionWrappingEnabled(true)
-            .positionWrappingInputRange(0, turningFactor);
+            .positionWrappingInputRange(-0.5, 0.5);
         }
     }
 }
