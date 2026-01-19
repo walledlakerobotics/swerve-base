@@ -23,6 +23,7 @@ public class Vision {
   private final PhotonPoseEstimator m_visionPoseEstimator = new PhotonPoseEstimator(
       VisionConstants.kAprilTagFieldLayout, Transform3d.kZero);
 
+  /** Create a new Vision. */
   public Vision(PoseEstimator3d<?> poseEstimator) {
     m_poseEstimator = poseEstimator;
 
@@ -31,6 +32,11 @@ public class Vision {
     }
   }
 
+  /**
+   * Gets the latest result from the specified camera.
+   * @param cameraIndex The index of the camera.
+   * @return The latest result from the specified camera.
+   */
   private Optional<PhotonPipelineResult> getLatestResult(int cameraIndex) {
     List<PhotonPipelineResult> results = m_cameras[cameraIndex].getAllUnreadResults();
 
@@ -41,6 +47,11 @@ public class Vision {
     }
   }
 
+  /**
+   * Gets the pose estimate from the specified camera.
+   * @param cameraIndex The index of the camera.
+   * @return The pose estimate from the specified camera.
+   */
   private Optional<EstimatedRobotPose> getCameraPoseEstimate(int cameraIndex) {
     m_visionPoseEstimator
         .setRobotToCameraTransform(VisionConstants.kRobotToCameraTransforms[cameraIndex]);
@@ -53,6 +64,11 @@ public class Vision {
     return m_visionPoseEstimator.estimateCoprocMultiTagPose(latestResult.get());
   }
 
+  /**
+   * Gets the distance to the best target from the pose estimate.
+   * @param poseEstimate The pose estimate.
+   * @return The distance to the best target.
+   */
   private double getBestDistance(EstimatedRobotPose poseEstimate) {
     double bestDistance = Double.POSITIVE_INFINITY;
 
@@ -66,10 +82,19 @@ public class Vision {
     return bestDistance;
   }
 
+  /**
+   * Gets the standard deviations for the camera scaled by the specified distance.
+   * @param cameraIndex The index of the camera.
+   * @param distanceMeters The distance to the target in meters.
+   * @return The scaled standard deviations.
+   */
   private Matrix<N4, N1> getCameraStdDevsForDistance(int cameraIndex, double distanceMeters) {
     return VisionConstants.kVisionMeasurementStdDevs.get(cameraIndex).times(distanceMeters);
   }
 
+  /**
+   * Updates the pose estimator with vision measurements.
+   */
   public void update() {
     for (int i = 0; i < m_cameras.length; i++) {
       Optional<EstimatedRobotPose> poseEstimateOptional = getCameraPoseEstimate(i);
