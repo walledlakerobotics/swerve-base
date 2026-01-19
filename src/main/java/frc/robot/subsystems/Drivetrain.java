@@ -19,10 +19,12 @@ import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -58,8 +60,8 @@ public class Drivetrain extends SubsystemBase {
   private final AHRS m_gyro = new AHRS(NavXComType.kMXP_SPI);
 
   // Odometry class for tracking robot pose
-  private final SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
-      DriveConstants.kDriveKinematics, getGyroHeading(),
+  private final SwerveDriveOdometry3d m_odometry = new SwerveDriveOdometry3d(
+      DriveConstants.kDriveKinematics, getGyroRotation3d(),
       new SwerveModulePosition[] { m_frontLeft.getPosition(), m_frontRight.getPosition(),
           m_rearLeft.getPosition(), m_rearRight.getPosition() });
 
@@ -84,16 +86,25 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // Update the odometry in the periodic block
-    m_odometry.update(getGyroHeading(), getModulePositions());
+    m_odometry.update(getGyroRotation3d(), getModulePositions());
+  }
+
+  /**
+   * Gets the currently-estimated 3D pose of the robot.
+   *
+   * @return The current 3D pose of the robot.
+   */
+  public Pose3d getPose3d() {
+    return m_odometry.getPoseMeters();
   }
 
   /**
    * Gets the currently-estimated pose of the robot.
    *
-   * @return The pose.
+   * @return The current pose of the robot.
    */
   public Pose2d getPose() {
-    return m_odometry.getPoseMeters();
+    return m_odometry.getPoseMeters().toPose2d();
   }
 
   /**
@@ -135,7 +146,63 @@ public class Drivetrain extends SubsystemBase {
    * @param pose The pose to which to set the odometry.
    */
   public void resetOdometry(Pose2d pose) {
-    m_odometry.resetPosition(getGyroHeading(), getModulePositions(), pose);
+    resetOdometry(new Pose3d(pose));
+  }
+
+  /**
+   * Resets the odometry to the specified pose.
+   *
+   * @param pose The pose to which to set the odometry.
+   */
+  public void resetOdometry(Pose3d pose) {
+    m_odometry.resetPosition(getGyroRotation3d(), getModulePositions(), pose);
+  }
+
+  /**
+   * Gets the field-relative heading of the robot.
+   *
+   * @return The robot's heading as a {@link Rotation2d}.
+   */
+  public Rotation2d getHeading() {
+    return m_odometry.getPoseMeters().getRotation().toRotation2d();
+  }
+
+  /**
+   * Gets the heading of the robot from the gyro directly. This may be offset from
+   * the field-relative heading.
+   *
+   * @return The gyro heading as a {@link Rotation2d}.
+   */
+  public Rotation2d getGyroHeading() {
+    return m_gyro.getRotation2d();
+  }
+
+  /**
+   * Gets the field-relative 3D rotation of the robot.
+   *
+   * @return The robot's rotation as a {@link Rotation3d}.
+   */
+  public Rotation3d getRotation3d() {
+    return m_odometry.getPoseMeters().getRotation();
+  }
+
+  /**
+   * Gets the 3D rotation of the robot from the gyro directly. This may be offset
+   * from the field-relative rotation.
+   * 
+   * @return The gyro rotation as a {@link Rotation3d}.
+   */
+  public Rotation3d getGyroRotation3d() {
+    return m_gyro.getRotation3d();
+  }
+
+  /**
+   * Gets the turn rate of the robot.
+   *
+   * @return The turn rate of the robot as a {@link Rotation2d}.
+   */
+  public Rotation2d getTurnRate() {
+    return Rotation2d.fromDegrees(-m_gyro.getRate());
   }
 
   /**
@@ -240,7 +307,7 @@ public class Drivetrain extends SubsystemBase {
 
   /** Resets the drive encoders to currently read a position of 0. */
   public void resetEncoders() {
-    Pose2d currentPose = getPose();
+    Pose3d currentPose = getPose3d();
 
     m_frontLeft.resetEncoders();
     m_rearLeft.resetEncoders();
@@ -257,7 +324,7 @@ public class Drivetrain extends SubsystemBase {
    */
   public Command resetFieldRelative() {
     return Commands.runOnce(() -> {
-      Pose2d currentPose = getPose();
+      Pose3d currentPose = getPose3d();
       m_gyro.reset();
 
       resetOdometry(currentPose);
@@ -277,33 +344,5 @@ public class Drivetrain extends SubsystemBase {
       m_rearLeft.setIdleMode(idleMode);
       m_rearRight.setIdleMode(idleMode);
     }).ignoringDisable(true);
-  }
-
-  /**
-   * Gets the field-relative heading of the robot.
-   *
-   * @return The robot's heading as a {@link Rotation2d}.
-   */
-  public Rotation2d getHeading() {
-    return m_odometry.getPoseMeters().getRotation();
-  }
-
-  /**
-   * Gets the heading of the robot from the gyro directly. This may be offset from
-   * the field-relative heading.
-   *
-   * @return The gyro heading as a {@link Rotation2d}.
-   */
-  public Rotation2d getGyroHeading() {
-    return m_gyro.getRotation2d();
-  }
-
-  /**
-   * Gets the turn rate of the robot.
-   *
-   * @return The turn rate of the robot as a {@link Rotation2d}.
-   */
-  public Rotation2d getTurnRate() {
-    return Rotation2d.fromDegrees(-m_gyro.getRate());
   }
 }
