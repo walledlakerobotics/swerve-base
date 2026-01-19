@@ -60,4 +60,8 @@
     "edu.wpi.first.math.**.struct.*",
   ],
   "java.dependency.enableDependencyCheckup": false,
+  "[java]": {
+    "spotlessGradle.format.enable": true,
+    "spotlessGradle.diagnostics.enable": true
+  }
 }
