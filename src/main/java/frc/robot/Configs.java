@@ -1,5 +1,7 @@
 package frc.robot;
 
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
@@ -9,6 +11,8 @@ public final class Configs {
   public static final class SwerveModule {
     public static final SparkMaxConfig drivingConfig = new SparkMaxConfig();
     public static final SparkMaxConfig turningConfig = new SparkMaxConfig();
+
+    public static final MagnetSensorConfigs turningEncoderConfig = new MagnetSensorConfigs();
 
     static {
       // Use module constants to calculate conversion factors and feed forward gain.
@@ -45,6 +49,12 @@ public final class Configs {
           .outputRange(-1, 1)
           .positionWrappingEnabled(true)
           .positionWrappingInputRange(-0.5, 0.5);
+
+      turningEncoderConfig
+          .withSensorDirection(
+              ModuleConstants.kTurningEncoderInverted ? SensorDirectionValue.Clockwise_Positive
+                  : SensorDirectionValue.CounterClockwise_Positive)
+          .withAbsoluteSensorDiscontinuityPoint(0.5);
     }
   }
 }

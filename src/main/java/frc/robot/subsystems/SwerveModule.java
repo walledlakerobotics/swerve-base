@@ -6,7 +6,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -20,8 +19,8 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.measure.Angle;
 import frc.robot.Configs;
-import frc.robot.Constants.ModuleConstants;
 
 public class SwerveModule {
   private final SparkMax m_drivingSpark;
@@ -63,16 +62,13 @@ public class SwerveModule {
 
     m_turningEncoder = new CANcoder(turningEncoderId);
 
-    MagnetSensorConfigs turningEncoderConfig = new MagnetSensorConfigs();
-    m_turningEncoder.getConfigurator().refresh(turningEncoderConfig);
+    MagnetSensorConfigs magnetSensorConfigs = new MagnetSensorConfigs();
+    m_turningEncoder.getConfigurator().refresh(magnetSensorConfigs);
 
-    turningEncoderConfig
-        .withSensorDirection(
-            ModuleConstants.kTurningEncoderInverted ? SensorDirectionValue.Clockwise_Positive
-                : SensorDirectionValue.CounterClockwise_Positive)
-        .withAbsoluteSensorDiscontinuityPoint(0.5);
+    Angle magnetOffset = magnetSensorConfigs.getMagnetOffsetMeasure();
 
-    m_turningEncoder.getConfigurator().apply(turningEncoderConfig);
+    m_turningEncoder.getConfigurator()
+        .apply(Configs.SwerveModule.turningEncoderConfig.withMagnetOffset(magnetOffset));
 
     m_chassisAngularOffset = Rotation2d.fromRadians(chassisAngularOffset);
     m_desiredState.angle = getAngle();
