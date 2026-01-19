@@ -41,7 +41,7 @@ public final class Configs {
           .velocityConversionFactor(turningFactor / 60.0); // rotations per second
       turningConfig.closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-          .pid(3.5, 0, 0.5)
+          .pid(1, 0, 0)
           .outputRange(-1, 1)
           .positionWrappingEnabled(true)
           .positionWrappingInputRange(-0.5, 0.5);
