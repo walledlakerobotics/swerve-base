@@ -9,7 +9,6 @@ import java.util.function.DoubleSupplier;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
-import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
@@ -37,7 +36,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.ModuleConstants;
 import frc.robot.Constants.OIConstants;
 
 public class Drivetrain extends SubsystemBase {
@@ -69,9 +67,7 @@ public class Drivetrain extends SubsystemBase {
   // Vision class for managing PhotonVision cameras and pose estimates
   private final Vision m_vision = new Vision(m_odometry);
 
-  // Setpoint generator for physically possible setpoint transitions
-  private final SwerveSetpointGenerator m_setpointGenerator = new SwerveSetpointGenerator(
-      DriveConstants.kRobotConfig, ModuleConstants.kMaxSteerSpeedRadPerSec);
+  // Setpoint for physically possible setpoint transitions
   private SwerveSetpoint m_previousSetpoint = new SwerveSetpoint(getChassisSpeeds(),
       getModuleStates(), DriveFeedforwards.zeros(DriveConstants.kRobotConfig.numModules));
 
@@ -243,8 +239,8 @@ public class Drivetrain extends SubsystemBase {
    * @param chassisSpeeds The desired chassis speeds.
    */
   public void drive(ChassisSpeeds chassisSpeeds) {
-    m_previousSetpoint = m_setpointGenerator.generateSetpoint(m_previousSetpoint, chassisSpeeds,
-        TimedRobot.kDefaultPeriod);
+    m_previousSetpoint = DriveConstants.setpointGenerator.generateSetpoint(m_previousSetpoint,
+        chassisSpeeds, TimedRobot.kDefaultPeriod);
 
     setModuleStates(m_previousSetpoint.moduleStates());
   }

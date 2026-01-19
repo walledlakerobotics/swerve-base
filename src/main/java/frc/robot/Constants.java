@@ -10,6 +10,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.controllers.PathFollowingController;
+import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -41,7 +42,8 @@ public final class Constants {
     public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
 
     // Odometry measurement standard deviations
-    public static final Matrix<N4, N1> kOdometryStdDevs = VecBuilder.fill(0.001, 0.001, 0.001, 0.01);
+    public static final Matrix<N4, N1> kOdometryStdDevs = VecBuilder.fill(0.001, 0.001, 0.001,
+        0.01);
 
     // Chassis configuration
     public static final double kTrackWidth = Units.inchesToMeters(23);
@@ -76,6 +78,9 @@ public final class Constants {
     public static final int kFrontRightTurningEncoderId = 12;
     public static final int kRearLeftTurningEncoderId = 13;
     public static final int kRearRightTurningEncoderId = 11;
+
+    public static final SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(
+        DriveConstants.kRobotConfig, ModuleConstants.kMaxSteerSpeedRadPerSec);
 
     public static final RobotConfig kRobotConfig;
 
