@@ -16,6 +16,7 @@ To get started, make sure you have calibrated the zero offsets for the absolute 
 * Vision with PhotonVision
 
 ## Prerequisites
+
 * CTRE-Phoenix (v6) v26.1.0
 * PathplannerLib v2026.1.2
 * PhotonLib v2026.1.1-rc-3
