@@ -154,3 +154,6 @@ spotless {
         endWithNewline()
     }
 }
+
+// Run Spotless check before building
+compileJava.dependsOn 'spotlessApply'
