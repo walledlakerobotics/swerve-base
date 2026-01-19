@@ -71,19 +71,22 @@ public class Vision {
    * @return The distance to the best target.
    */
   private double getBestTargetDistance(EstimatedRobotPose poseEstimate) {
+    // Best target is the first target in the list
     PhotonTrackedTarget target = poseEstimate.targetsUsed.get(0);
     return target.bestCameraToTarget.getTranslation().getNorm();
   }
 
   /**
-   * Gets the standard deviations for the camera scaled by the specified distance.
+   * Gets the standard deviations for the camera given a pose estimate.
    *
    * @param cameraIndex The index of the camera.
-   * @param distanceMeters The distance to the target in meters.
+   * @param poseEstimate The pose estimate.
    * @return The scaled standard deviations.
    */
-  private Matrix<N4, N1> getCameraStdDevsForDistance(int cameraIndex, double distanceMeters) {
-    return VisionConstants.kVisionMeasurementStdDevs.get(cameraIndex).times(distanceMeters);
+  private Matrix<N4, N1> getCameraStdDevs(int cameraIndex, EstimatedRobotPose poseEstimate) {
+    return VisionConstants.kVisionMeasurementStdDevs
+        .get(cameraIndex)
+        .times(getBestTargetDistance(poseEstimate));
   }
 
   /** Updates the pose estimator with vision measurements. */
@@ -94,12 +97,10 @@ public class Vision {
 
       EstimatedRobotPose poseEstimate = poseEstimateOptional.get();
 
-      double bestDistance = getBestTargetDistance(poseEstimate);
-
       m_poseEstimator.addVisionMeasurement(
           poseEstimate.estimatedPose,
           poseEstimate.timestampSeconds,
-          getCameraStdDevsForDistance(i, bestDistance));
+          getCameraStdDevs(i, poseEstimate));
     }
   }
 }
