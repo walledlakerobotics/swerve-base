@@ -71,16 +71,8 @@ public class Vision {
    * @return The distance to the best target.
    */
   private double getBestDistance(EstimatedRobotPose poseEstimate) {
-    double bestDistance = Double.POSITIVE_INFINITY;
-
-    for (PhotonTrackedTarget target : poseEstimate.targetsUsed) {
-      double distance = target.bestCameraToTarget.getTranslation().getNorm();
-      if (distance < bestDistance) {
-        bestDistance = distance;
-      }
-    }
-
-    return bestDistance;
+    PhotonTrackedTarget target = poseEstimate.targetsUsed.get(0);
+    return target.bestCameraToTarget.getTranslation().getNorm();
   }
 
   /**
