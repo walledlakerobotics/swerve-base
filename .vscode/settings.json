@@ -60,8 +60,9 @@
     "edu.wpi.first.math.**.struct.*",
   ],
   "java.dependency.enableDependencyCheckup": false,
-  "[java]": {
-    "spotlessGradle.format.enable": true,
-    "spotlessGradle.diagnostics.enable": true
-  }
+  "spotlessGradle.format.enable": true,
+  "spotlessGradle.diagnostics.enable": true,
+  "editor.defaultFormatter": "richardwillis.vscode-spotless-gradle",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true
 }
