@@ -18,13 +18,15 @@ import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator3d;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -59,12 +61,15 @@ public class Drivetrain extends SubsystemBase {
   // The gyro sensor
   private final AHRS m_gyro = new AHRS(NavXComType.kMXP_SPI);
 
-  // Odometry class for tracking robot pose
-  private final SwerveDriveOdometry3d m_odometry = new SwerveDriveOdometry3d(
-      DriveConstants.kDriveKinematics, getGyroRotation3d(),
-      new SwerveModulePosition[] { m_frontLeft.getPosition(), m_frontRight.getPosition(),
-          m_rearLeft.getPosition(), m_rearRight.getPosition() });
+  // Pose estimator class for tracking robot pose
+  private final SwerveDrivePoseEstimator3d m_odometry = new SwerveDrivePoseEstimator3d(
+      DriveConstants.kDriveKinematics, getGyroRotation3d(), getModulePositions(), getPose3d(),
+      DriveConstants.kOdometryStdDevs, new Matrix<>(Nat.N4(), Nat.N1()));
 
+  // Vision class for managing PhotonVision cameras and pose estimates
+  private final Vision m_vision = new Vision(m_odometry);
+
+  // Setpoint generator for physically possible setpoint transitions
   private final SwerveSetpointGenerator m_setpointGenerator = new SwerveSetpointGenerator(
       DriveConstants.kRobotConfig, ModuleConstants.kMaxSteerSpeedRadPerSec);
   private SwerveSetpoint m_previousSetpoint = new SwerveSetpoint(getChassisSpeeds(),
@@ -79,13 +84,13 @@ public class Drivetrain extends SubsystemBase {
         AutoConstants.kPathFollowingController, DriveConstants.kRobotConfig, () -> false, this);
 
     RobotModeTriggers.disabled().and(() -> !DriverStation.isFMSAttached())
-        .onTrue(setIdleMode(IdleMode.kCoast))
-        .onFalse(setIdleMode(IdleMode.kBrake));
+        .onTrue(setIdleMode(IdleMode.kCoast)).onFalse(setIdleMode(IdleMode.kBrake));
   }
 
   @Override
   public void periodic() {
-    // Update the odometry in the periodic block
+    // Update vision and odometry in the periodic block
+    m_vision.update();
     m_odometry.update(getGyroRotation3d(), getModulePositions());
   }
 
@@ -95,7 +100,7 @@ public class Drivetrain extends SubsystemBase {
    * @return The current 3D pose of the robot.
    */
   public Pose3d getPose3d() {
-    return m_odometry.getPoseMeters();
+    return m_odometry.getEstimatedPosition();
   }
 
   /**
@@ -104,7 +109,7 @@ public class Drivetrain extends SubsystemBase {
    * @return The current pose of the robot.
    */
   public Pose2d getPose() {
-    return m_odometry.getPoseMeters().toPose2d();
+    return m_odometry.getEstimatedPosition().toPose2d();
   }
 
   /**
@@ -164,7 +169,7 @@ public class Drivetrain extends SubsystemBase {
    * @return The robot's heading as a {@link Rotation2d}.
    */
   public Rotation2d getHeading() {
-    return m_odometry.getPoseMeters().getRotation().toRotation2d();
+    return m_odometry.getEstimatedPosition().getRotation().toRotation2d();
   }
 
   /**
@@ -183,7 +188,7 @@ public class Drivetrain extends SubsystemBase {
    * @return The robot's rotation as a {@link Rotation3d}.
    */
   public Rotation3d getRotation3d() {
-    return m_odometry.getPoseMeters().getRotation();
+    return m_odometry.getEstimatedPosition().getRotation();
   }
 
   /**
@@ -232,7 +237,8 @@ public class Drivetrain extends SubsystemBase {
   }
 
   /**
-   * Method to drive the robot using a robot-relative {@link ChassisSpeeds} object.
+   * Method to drive the robot using a robot-relative {@link ChassisSpeeds}
+   * object.
    *
    * @param chassisSpeeds The desired chassis speeds.
    */
