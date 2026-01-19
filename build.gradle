@@ -155,5 +155,5 @@ spotless {
     }
 }
 
-// Run Spotless check before building
+// Run Spotless before building
 compileJava.dependsOn 'spotlessApply'
