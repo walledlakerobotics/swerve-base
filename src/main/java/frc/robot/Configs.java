@@ -4,7 +4,6 @@ import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import frc.robot.Constants.ModuleConstants;
 
 public final class Configs {
@@ -16,8 +15,8 @@ public final class Configs {
 
     static {
       // Use module constants to calculate conversion factors and feed forward gain.
-      double drivingFactor = ModuleConstants.kWheelDiameterMeters * Math.PI
-          / ModuleConstants.kDrivingMotorReduction;
+      double drivingFactor =
+          ModuleConstants.kWheelDiameterMeters * Math.PI / ModuleConstants.kDrivingMotorReduction;
       double turningFactor = 1 / ModuleConstants.kTurningMotorReduction;
       double nominalVoltage = 12.0;
       double drivingVelocityFeedForward = nominalVoltage / ModuleConstants.kDriveWheelFreeSpeedRps;
@@ -26,24 +25,28 @@ public final class Configs {
           .inverted(ModuleConstants.kDrivingMotorsInverted)
           .idleMode(ModuleConstants.kDrivingMotorIdleMode)
           .smartCurrentLimit(ModuleConstants.kDrivingMotorCurrentLimit);
-      drivingConfig.encoder
+      drivingConfig
+          .encoder
           .positionConversionFactor(drivingFactor) // meters
           .velocityConversionFactor(drivingFactor / 60.0); // meters per second
-      drivingConfig.closedLoop
+      drivingConfig
+          .closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
           .pid(0.04, 0, 0)
           .outputRange(-1, 1)
           .feedForward
-              .kV(drivingVelocityFeedForward);
+          .kV(drivingVelocityFeedForward);
 
       turningConfig
           .inverted(ModuleConstants.kTurningMotorsInverted)
           .idleMode(ModuleConstants.kTurningMotorIdleMode)
           .smartCurrentLimit(ModuleConstants.kTurningMotorCurrentLimit);
-      turningConfig.encoder
+      turningConfig
+          .encoder
           .positionConversionFactor(turningFactor) // rotations
           .velocityConversionFactor(turningFactor / 60.0); // rotations per second
-      turningConfig.closedLoop
+      turningConfig
+          .closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
           .pid(1, 0, 0)
           .outputRange(-1, 1)
@@ -52,7 +55,8 @@ public final class Configs {
 
       turningEncoderConfig
           .withSensorDirection(
-              ModuleConstants.kTurningEncoderInverted ? SensorDirectionValue.Clockwise_Positive
+              ModuleConstants.kTurningEncoderInverted
+                  ? SensorDirectionValue.Clockwise_Positive
                   : SensorDirectionValue.CounterClockwise_Positive)
           .withAbsoluteSensorDiscontinuityPoint(0.5);
     }

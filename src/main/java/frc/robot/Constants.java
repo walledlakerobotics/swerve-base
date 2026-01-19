@@ -4,15 +4,12 @@
 
 package frc.robot;
 
-import java.util.List;
-
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.controllers.PathFollowingController;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
@@ -23,16 +20,15 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N4;
 import edu.wpi.first.math.util.Units;
+import java.util.List;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide
- * numerical or boolean constants. This class should not be used for any other
- * purpose. All constants should be declared globally (i.e. public static). Do
- * not put anything functional in this class.
+ * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
+ * constants. This class should not be used for any other purpose. All constants should be declared
+ * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>
- * It is advised to statically import this class (or one of its inner classes)
- * wherever the constants are needed, to reduce verbosity.
+ * <p>It is advised to statically import this class (or one of its inner classes) wherever the
+ * constants are needed, to reduce verbosity.
  */
 public final class Constants {
   public static final class DriveConstants {
@@ -42,19 +38,20 @@ public final class Constants {
     public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
 
     // Odometry measurement standard deviations
-    public static final Matrix<N4, N1> kOdometryStdDevs = VecBuilder.fill(0.001, 0.001, 0.001,
-        0.01);
+    public static final Matrix<N4, N1> kOdometryStdDevs =
+        VecBuilder.fill(0.001, 0.001, 0.001, 0.01);
 
     // Chassis configuration
     public static final double kTrackWidth = Units.inchesToMeters(23);
     // Distance between centers of right and left wheels on robot
     public static final double kWheelBase = Units.inchesToMeters(23.125);
     // Distance between front and back wheels on robot
-    public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
-        new Translation2d(kWheelBase / 2, kTrackWidth / 2),
-        new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
-        new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
-        new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
+    public static final SwerveDriveKinematics kDriveKinematics =
+        new SwerveDriveKinematics(
+            new Translation2d(kWheelBase / 2, kTrackWidth / 2),
+            new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
+            new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
+            new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
 
     // Angular offsets of the modules relative to the chassis in radians
     public static final double kFrontLeftChassisAngularOffset = -Math.PI / 2;
@@ -79,8 +76,9 @@ public final class Constants {
     public static final int kRearLeftTurningEncoderId = 13;
     public static final int kRearRightTurningEncoderId = 11;
 
-    public static final SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(
-        DriveConstants.kRobotConfig, ModuleConstants.kMaxSteerSpeedRadPerSec);
+    public static final SwerveSetpointGenerator setpointGenerator =
+        new SwerveSetpointGenerator(
+            DriveConstants.kRobotConfig, ModuleConstants.kMaxSteerSpeedRadPerSec);
 
     public static final RobotConfig kRobotConfig;
 
@@ -100,13 +98,13 @@ public final class Constants {
     public static final double kWheelCircumferenceMeters = kWheelDiameterMeters * Math.PI;
 
     public static final double kDrivingMotorReduction = 6.75;
-    public static final double kDriveWheelFreeSpeedRps = (NeoMotorConstants.kFreeSpeedRps
-        * kWheelCircumferenceMeters) / kDrivingMotorReduction;
+    public static final double kDriveWheelFreeSpeedRps =
+        (NeoMotorConstants.kFreeSpeedRps * kWheelCircumferenceMeters) / kDrivingMotorReduction;
 
     public static final double kTurningMotorReduction = 150.0 / 7;
 
-    public static final double kMaxSteerSpeedRadPerSec = 0.9
-        * Units.rotationsToRadians(NeoMotorConstants.kFreeSpeedRps / kTurningMotorReduction);
+    public static final double kMaxSteerSpeedRadPerSec =
+        0.9 * Units.rotationsToRadians(NeoMotorConstants.kFreeSpeedRps / kTurningMotorReduction);
 
     public static final IdleMode kDrivingMotorIdleMode = IdleMode.kBrake;
     public static final IdleMode kTurningMotorIdleMode = IdleMode.kBrake;
@@ -117,7 +115,6 @@ public final class Constants {
     public static final boolean kDrivingMotorsInverted = true;
     public static final boolean kTurningMotorsInverted = true;
     public static final boolean kTurningEncoderInverted = false;
-
   }
 
   public static final class OIConstants {
@@ -129,8 +126,8 @@ public final class Constants {
     public static final PIDConstants kTranslationConstants = new PIDConstants(1, 0, 0);
     public static final PIDConstants kRotationConstants = new PIDConstants(1, 0, 0);
 
-    public static final PathFollowingController kPathFollowingController = new PPHolonomicDriveController(
-        kTranslationConstants, kRotationConstants);
+    public static final PathFollowingController kPathFollowingController =
+        new PPHolonomicDriveController(kTranslationConstants, kRotationConstants);
   }
 
   public static final class NeoMotorConstants {
@@ -143,7 +140,7 @@ public final class Constants {
     public static final Transform3d[] kRobotToCameraTransforms = {};
     public static final List<Matrix<N4, N1>> kVisionMeasurementStdDevs = List.of();
 
-    public static final AprilTagFieldLayout kAprilTagFieldLayout = AprilTagFieldLayout
-        .loadField(AprilTagFields.k2026RebuiltWelded);
+    public static final AprilTagFieldLayout kAprilTagFieldLayout =
+        AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
   }
 }

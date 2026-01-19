@@ -23,22 +23,19 @@ public class RobotContainer {
   private final Drivetrain m_robotDrive = new Drivetrain();
 
   // The driver's controller
-  CommandXboxController m_driverController = new CommandXboxController(
-      OIConstants.kDriverControllerPort);
+  CommandXboxController m_driverController =
+      new CommandXboxController(OIConstants.kDriverControllerPort);
 
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
+  /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be
-   * created by instantiating a {@link edu.wpi.first.wpilibj.GenericHID} or one of
-   * its subclasses ({@link edu.wpi.first.wpilibj.Joystick} or
-   * {@link XboxController}), and then calling passing it to a
+   * Use this method to define your button->command mappings. Buttons can be created by
+   * instantiating a {@link edu.wpi.first.wpilibj.GenericHID} or one of its subclasses ({@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then calling passing it to a
    * {@link JoystickButton}.
    */
   private void configureButtonBindings() {
@@ -46,8 +43,11 @@ public class RobotContainer {
     m_robotDrive.setDefaultCommand(
         // The left stick controls translation of the robot.
         // Turning is controlled by the X axis of the right stick.
-        m_robotDrive.drive(m_driverController::getLeftY, m_driverController::getLeftX,
-            m_driverController::getRightX, true));
+        m_robotDrive.drive(
+            m_driverController::getLeftY,
+            m_driverController::getLeftX,
+            m_driverController::getRightX,
+            true));
 
     m_driverController.rightBumper().whileTrue(m_robotDrive.setX());
 
