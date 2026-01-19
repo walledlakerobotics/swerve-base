@@ -53,13 +53,17 @@ public class Vision {
     return m_visionPoseEstimator.estimateCoprocMultiTagPose(latestResult.get());
   }
 
-  private double getAverageDistance(EstimatedRobotPose poseEstimate) {
-    double totalDistance = 0.0;
+  private double getBestDistance(EstimatedRobotPose poseEstimate) {
+    double bestDistance = Double.POSITIVE_INFINITY;
+
     for (PhotonTrackedTarget target : poseEstimate.targetsUsed) {
-      totalDistance += target.bestCameraToTarget.getTranslation().getNorm();
+      double distance = target.bestCameraToTarget.getTranslation().getNorm();
+      if (distance < bestDistance) {
+        bestDistance = distance;
+      }
     }
 
-    return totalDistance / poseEstimate.targetsUsed.size();
+    return bestDistance;
   }
 
   private Matrix<N4, N1> getCameraStdDevsForDistance(int cameraIndex, double distanceMeters) {
@@ -74,10 +78,10 @@ public class Vision {
 
       EstimatedRobotPose poseEstimate = poseEstimateOptional.get();
 
-      double averageDistance = getAverageDistance(poseEstimate);
+      double bestDistance = getBestDistance(poseEstimate);
 
       m_poseEstimator.addVisionMeasurement(poseEstimate.estimatedPose,
-          poseEstimate.timestampSeconds, getCameraStdDevsForDistance(i, averageDistance));
+          poseEstimate.timestampSeconds, getCameraStdDevsForDistance(i, bestDistance));
     }
   }
 }
