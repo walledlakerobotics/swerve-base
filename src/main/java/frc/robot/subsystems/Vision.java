@@ -70,7 +70,7 @@ public class Vision {
    * @param poseEstimate The pose estimate.
    * @return The distance to the best target.
    */
-  private double getBestDistance(EstimatedRobotPose poseEstimate) {
+  private double getBestTargetDistance(EstimatedRobotPose poseEstimate) {
     PhotonTrackedTarget target = poseEstimate.targetsUsed.get(0);
     return target.bestCameraToTarget.getTranslation().getNorm();
   }
@@ -94,7 +94,7 @@ public class Vision {
 
       EstimatedRobotPose poseEstimate = poseEstimateOptional.get();
 
-      double bestDistance = getBestDistance(poseEstimate);
+      double bestDistance = getBestTargetDistance(poseEstimate);
 
       m_poseEstimator.addVisionMeasurement(
           poseEstimate.estimatedPose,
