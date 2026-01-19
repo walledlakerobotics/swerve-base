@@ -66,9 +66,11 @@ public class SwerveModule {
     MagnetSensorConfigs turningEncoderConfig = new MagnetSensorConfigs();
     m_turningEncoder.getConfigurator().refresh(turningEncoderConfig);
 
-    turningEncoderConfig.withSensorDirection(
-        ModuleConstants.kTurningEncoderInverted ? SensorDirectionValue.Clockwise_Positive
-            : SensorDirectionValue.CounterClockwise_Positive);
+    turningEncoderConfig
+        .withSensorDirection(
+            ModuleConstants.kTurningEncoderInverted ? SensorDirectionValue.Clockwise_Positive
+                : SensorDirectionValue.CounterClockwise_Positive)
+        .withAbsoluteSensorDiscontinuityPoint(0.5);
 
     m_turningEncoder.getConfigurator().apply(turningEncoderConfig);
 
