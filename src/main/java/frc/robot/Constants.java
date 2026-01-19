@@ -4,14 +4,23 @@
 
 package frc.robot;
 
+import java.util.List;
+
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.controllers.PathFollowingController;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N4;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -30,6 +39,9 @@ public final class Constants {
     // of the robot, rather the allowed maximum speeds
     public static final double kMaxSpeedMetersPerSecond = 4.47;
     public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
+
+    // Odometry measurement standard deviations
+    public static final Matrix<N4, N1> kOdometryStdDevs = VecBuilder.fill(0.001, 0.001, 0.001, 0.01);
 
     // Chassis configuration
     public static final double kTrackWidth = Units.inchesToMeters(23);
@@ -119,5 +131,14 @@ public final class Constants {
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
     public static final double kFreeSpeedRps = kFreeSpeedRpm / 60;
+  }
+
+  public static final class VisionConstants {
+    public static final String[] kCameraNames = {};
+    public static final Transform3d[] kRobotToCameraTransforms = {};
+    public static final List<Matrix<N4, N1>> kVisionMeasurementStdDevs = List.of();
+
+    public static final AprilTagFieldLayout kAprilTagFieldLayout = AprilTagFieldLayout
+        .loadField(AprilTagFields.k2026RebuiltWelded);
   }
 }
