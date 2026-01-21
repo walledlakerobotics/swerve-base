@@ -6,6 +6,7 @@ package frc.robot;
 
 import java.util.List;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -109,10 +110,11 @@ public final class Constants {
     public static final double kMaxSteerSpeedRadPerSec =
         0.9 * Units.rotationsToRadians(NeoMotorConstants.kFreeSpeedRps / kTurningMotorReduction);
 
-    public static final IdleMode kDrivingMotorIdleMode = IdleMode.kBrake;
+    public static final NeutralModeValue kDrivingMotorNeutralMode = NeutralModeValue.Brake;
     public static final IdleMode kTurningMotorIdleMode = IdleMode.kBrake;
 
-    public static final int kDrivingMotorCurrentLimit = 40; // amps
+    public static final int kDrivingMotorStatorLimit = 120; // amps
+    public static final int kDrivingMotorSupplyLimit = 40; // amps
     public static final int kTurningMotorCurrentLimit = 35; // amps
 
     public static final boolean kDrivingMotorsInverted = true;
