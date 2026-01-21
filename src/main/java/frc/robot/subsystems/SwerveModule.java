@@ -5,7 +5,10 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -20,21 +23,21 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
 import frc.robot.Configs;
+import frc.robot.Constants.ModuleConstants;
 
 /**
  * Represents a single swerve module, containing a driving motor, a turning motor, and a CANCoder
  * for absolute position feedback.
  */
 public class SwerveModule {
-  private final SparkMax m_drivingSpark;
+  private final TalonFX m_drivingTalon;
   private final SparkMax m_turningSpark;
 
-  private final RelativeEncoder m_drivingEncoder;
   private final CANcoder m_turningEncoder;
 
   private final RelativeEncoder m_turningFeedbackEncoder; // Forwards from CANCoder
 
-  private final SparkClosedLoopController m_drivingClosedLoopController;
+  private final VelocityVoltage m_drivingControlRequest;
   private final SparkClosedLoopController m_turningClosedLoopController;
 
   private Rotation2d m_chassisAngularOffset = Rotation2d.kZero;
@@ -46,22 +49,18 @@ public class SwerveModule {
    */
   public SwerveModule(
       int drivingCANId, int turningCANId, int turningEncoderId, double chassisAngularOffset) {
-    m_drivingSpark = new SparkMax(drivingCANId, MotorType.kBrushless);
+    m_drivingTalon = new TalonFX(drivingCANId);
     m_turningSpark = new SparkMax(turningCANId, MotorType.kBrushless);
 
-    m_drivingEncoder = m_drivingSpark.getEncoder();
     m_turningFeedbackEncoder = m_turningSpark.getEncoder();
 
-    m_drivingClosedLoopController = m_drivingSpark.getClosedLoopController();
+    m_drivingControlRequest = new VelocityVoltage(0.0);
     m_turningClosedLoopController = m_turningSpark.getClosedLoopController();
 
     // Apply the respective configurations to the SPARKS. Reset parameters before
     // applying the configuration to bring the SPARK to a known good state. Persist
     // the settings to the SPARK to avoid losing them on a power cycle.
-    m_drivingSpark.configure(
-        Configs.SwerveModule.drivingConfig,
-        ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters);
+    m_drivingTalon.getConfigurator().apply(Configs.SwerveModule.drivingConfig);
     m_turningSpark.configure(
         Configs.SwerveModule.turningConfig,
         ResetMode.kResetSafeParameters,
@@ -80,7 +79,7 @@ public class SwerveModule {
 
     m_chassisAngularOffset = Rotation2d.fromRadians(chassisAngularOffset);
     m_desiredState.angle = getAngle();
-    m_drivingEncoder.setPosition(0);
+    m_drivingTalon.setPosition(0);
   }
 
   /**
@@ -105,7 +104,8 @@ public class SwerveModule {
     // Apply chassis angular offset to the encoder position to get the position
     // relative to the chassis.
     return new SwerveModuleState(
-        m_drivingEncoder.getVelocity(), getAngle().minus(m_chassisAngularOffset));
+        m_drivingTalon.getVelocity().getValueAsDouble() * ModuleConstants.kWheelCircumferenceMeters,
+        getAngle().minus(m_chassisAngularOffset));
   }
 
   /**
@@ -117,7 +117,8 @@ public class SwerveModule {
     // Apply chassis angular offset to the encoder position to get the position
     // relative to the chassis.
     return new SwerveModulePosition(
-        m_drivingEncoder.getPosition(), getAngle().minus(m_chassisAngularOffset));
+        m_drivingTalon.getPosition().getValueAsDouble() * ModuleConstants.kWheelCircumferenceMeters,
+        getAngle().minus(m_chassisAngularOffset));
   }
 
   /**
@@ -135,8 +136,10 @@ public class SwerveModule {
     correctedDesiredState.optimize(getAngle());
 
     // Command driving and turning SPARKS towards their respective setpoints.
-    m_drivingClosedLoopController.setSetpoint(
-        correctedDesiredState.speedMetersPerSecond, ControlType.kVelocity);
+    m_drivingTalon.setControl(
+        m_drivingControlRequest.withVelocity(
+            correctedDesiredState.speedMetersPerSecond
+                / ModuleConstants.kWheelCircumferenceMeters));
     m_turningClosedLoopController.setSetpoint(
         correctedDesiredState.angle.getRotations(), ControlType.kPosition);
 
@@ -145,7 +148,7 @@ public class SwerveModule {
 
   /** Zeroes all the SwerveModule encoders. */
   public void resetEncoders() {
-    m_drivingEncoder.setPosition(0);
+    m_drivingTalon.setPosition(0);
   }
 
   /**
@@ -157,8 +160,8 @@ public class SwerveModule {
     SparkMaxConfig config = new SparkMaxConfig();
     config.idleMode(idleMode);
 
-    m_drivingSpark.configure(
-        config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    m_drivingTalon.setNeutralMode(
+        idleMode == IdleMode.kBrake ? NeutralModeValue.Brake : NeutralModeValue.Coast);
     m_turningSpark.configure(
         config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
