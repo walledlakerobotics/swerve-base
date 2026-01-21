@@ -84,9 +84,15 @@ public class Vision {
    * @return The scaled standard deviations.
    */
   private Matrix<N4, N1> getCameraStdDevs(int cameraIndex, EstimatedRobotPose poseEstimate) {
-    return VisionConstants.kVisionMeasurementStdDevs
-        .get(cameraIndex)
-        .times(getBestTargetDistance(poseEstimate));
+    Matrix<N4, N1> stdDevs = VisionConstants.kVisionMeasurementStdDevs.get(cameraIndex);
+
+    double angleStdDev = stdDevs.get(3, 0);
+
+    // Scale position std devs based on distance to target
+    stdDevs = stdDevs.times(getBestTargetDistance(poseEstimate));
+    stdDevs.set(3, 0, angleStdDev);
+
+    return stdDevs;
   }
 
   /** Updates the pose estimator with vision measurements. */
