@@ -14,6 +14,9 @@ import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+/**
+ * Processes vision data from PhotonVision and updating the robot's pose estimate.
+ */
 public class Vision {
   private final PoseEstimator3d<?> m_poseEstimator;
   private final PhotonCamera[] m_cameras = new PhotonCamera[VisionConstants.kCameraNames.length];

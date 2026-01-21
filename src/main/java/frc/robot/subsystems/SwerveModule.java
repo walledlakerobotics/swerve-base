@@ -21,6 +21,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
 import frc.robot.Configs;
 
+/**
+ * Represents a single swerve module, containing a driving motor, a turning motor, and a CANCoder
+ * for absolute position feedback.
+ */
 public class SwerveModule {
   private final SparkMax m_drivingSpark;
   private final SparkMax m_turningSpark;

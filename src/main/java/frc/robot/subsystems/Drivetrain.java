@@ -36,6 +36,9 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import java.util.function.DoubleSupplier;
 
+/**
+ * Subsystem to control a swerve drivetrain.
+ */
 public class Drivetrain extends SubsystemBase {
   // Create SwerveModules
   private final SwerveModule m_frontLeft =
