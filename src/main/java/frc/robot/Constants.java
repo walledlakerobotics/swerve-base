@@ -4,12 +4,15 @@
 
 package frc.robot;
 
+import java.util.List;
+
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.controllers.PathFollowingController;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
@@ -20,7 +23,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N4;
 import edu.wpi.first.math.util.Units;
-import java.util.List;
+import frc.robot.utils.CANIDs;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -60,21 +63,21 @@ public final class Constants {
     public static final double kBackRightChassisAngularOffset = Math.PI / 2;
 
     // // SPARK MAX CAN IDs
-    public static final int kFrontLeftDrivingCanId = 8;
-    public static final int kRearLeftDrivingCanId = 6;
-    public static final int kFrontRightDrivingCanId = 2;
-    public static final int kRearRightDrivingCanId = 4;
+    public static final int kFrontLeftDrivingCanId = CANIDs.frontLeftDrive(); // 8
+    public static final int kRearLeftDrivingCanId = CANIDs.rearLeftDrive(); // 6
+    public static final int kFrontRightDrivingCanId = CANIDs.frontRightDrive(); // 2
+    public static final int kRearRightDrivingCanId = CANIDs.rearRightDrive(); // 4
 
-    public static final int kFrontLeftTurningCanId = 7;
-    public static final int kRearLeftTurningCanId = 5;
-    public static final int kFrontRightTurningCanId = 1;
-    public static final int kRearRightTurningCanId = 3;
+    public static final int kFrontLeftTurningCanId = CANIDs.frontLeftTurning(); // 7
+    public static final int kRearLeftTurningCanId = CANIDs.rearLeftTurning(); // 5
+    public static final int kFrontRightTurningCanId = CANIDs.frontRightTurning(); // 1
+    public static final int kRearRightTurningCanId = CANIDs.rearRightTurning(); // 3
 
-    // Encoder CAN Ids
-    public static final int kFrontLeftTurningEncoderId = 14;
-    public static final int kFrontRightTurningEncoderId = 12;
-    public static final int kRearLeftTurningEncoderId = 13;
-    public static final int kRearRightTurningEncoderId = 11;
+    // Encoder CAN IDs
+    public static final int kFrontLeftTurningEncoderId = CANIDs.frontLeftEncoder(); // 14
+    public static final int kRearLeftTurningEncoderId = CANIDs.rearLeftEncoder(); // 13
+    public static final int kFrontRightTurningEncoderId = CANIDs.frontRightEncoder(); // 12
+    public static final int kRearRightTurningEncoderId = CANIDs.rearRightEncoder(); // 11
 
     public static final SwerveSetpointGenerator setpointGenerator =
         new SwerveSetpointGenerator(
