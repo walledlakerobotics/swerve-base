@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import frc.robot.Constants.KrakenX60MotorConstants;
 import frc.robot.Constants.ModuleConstants;
 
 /** Contains configuration objects for various robot components. */
@@ -25,7 +26,10 @@ public final class Configs {
       // Use module constants to calculate conversion factors and feed forward gain.
       double turningFactor = 1 / ModuleConstants.kTurningMotorReduction;
       double nominalVoltage = 12.0;
-      double drivingVelocityFeedForward = nominalVoltage / ModuleConstants.kDriveWheelFreeSpeedRps;
+      double drivingVelocityFeedForward =
+          nominalVoltage
+              * ModuleConstants.kDrivingMotorReduction
+              / KrakenX60MotorConstants.kFreeSpeedRps;
 
       drivingConfig
           .withMotorOutput(

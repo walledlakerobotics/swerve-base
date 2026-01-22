@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import java.util.List;
-
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -13,7 +11,6 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.controllers.PathFollowingController;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
@@ -25,6 +22,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N4;
 import edu.wpi.first.math.util.Units;
 import frc.robot.utils.CANIDs;
+import java.util.List;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -103,7 +101,7 @@ public final class Constants {
 
     public static final double kDrivingMotorReduction = 6.75;
     public static final double kDriveWheelFreeSpeedRps =
-        (KrakenX60MotorConstants.kFreeSpeedRps * kWheelCircumferenceMeters) / kDrivingMotorReduction;
+        KrakenX60MotorConstants.kFreeSpeedRps / kDrivingMotorReduction;
 
     public static final double kTurningMotorReduction = 150.0 / 7;
 
