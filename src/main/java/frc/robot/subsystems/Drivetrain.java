@@ -76,7 +76,7 @@ public class Drivetrain extends SubsystemBase {
           DriveConstants.kDriveKinematics,
           getGyroRotation3d(),
           getModulePositions(),
-          getPose3d(),
+          Pose3d.kZero,
           DriveConstants.kOdometryStdDevs,
           new Matrix<>(Nat.N4(), Nat.N1()));
 
