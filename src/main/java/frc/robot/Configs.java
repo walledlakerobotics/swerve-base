@@ -20,7 +20,7 @@ public final class Configs {
       // Use module constants to calculate conversion factors and feed forward gain.
       double drivingFactor =
           ModuleConstants.kWheelDiameterMeters * Math.PI / ModuleConstants.kDrivingMotorReduction;
-      double turningFactor = 1 / ModuleConstants.kTurningMotorReduction;
+      double turningFactor = 1.0 / ModuleConstants.kTurningMotorReduction;
       double nominalVoltage = 12.0;
       double drivingVelocityFeedForward = nominalVoltage / ModuleConstants.kDriveWheelFreeSpeedRps;
 
@@ -36,8 +36,9 @@ public final class Configs {
           .closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
           .pid(0.04, 0, 0)
-          .outputRange(-1, 1)
+          .outputRange(-1.0, 1.0)
           .feedForward
+          .kS(0.0)
           .kV(drivingVelocityFeedForward);
 
       turningConfig
@@ -51,8 +52,8 @@ public final class Configs {
       turningConfig
           .closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-          .pid(1, 0, 0)
-          .outputRange(-1, 1)
+          .pid(1.0, 0, 0)
+          .outputRange(-1.0, 1.0)
           .positionWrappingEnabled(true)
           .positionWrappingInputRange(-0.5, 0.5);
 
