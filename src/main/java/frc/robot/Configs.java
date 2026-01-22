@@ -46,7 +46,8 @@ public final class Configs {
                   .withKI(0.0)
                   .withKD(0.0)
                   .withKS(0.0)
-                  .withKV(drivingVelocityFeedForward));
+                  .withKV(drivingVelocityFeedForward)
+                  .withKA(0.0));
 
       turningConfig
           .inverted(ModuleConstants.kTurningMotorsInverted)
