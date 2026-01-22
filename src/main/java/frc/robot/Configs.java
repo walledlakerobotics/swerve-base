@@ -6,9 +6,7 @@ import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants.ModuleConstants;
 
-/**
- * Contains configuration objects for various robot components.
- */
+/** Contains configuration objects for various robot components. */
 public final class Configs {
   public static final class SwerveModule {
     public static final SparkMaxConfig drivingConfig = new SparkMaxConfig();
