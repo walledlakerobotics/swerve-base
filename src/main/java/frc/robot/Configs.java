@@ -36,9 +36,7 @@ public final class Configs {
           .pid(0.04, 0, 0)
           .outputRange(-1.0, 1.0)
           .feedForward
-          .kS(0.0)
-          .kV(drivingVelocityFeedForward)
-          .kA(0.0);
+          .sva(0.0, drivingVelocityFeedForward, 0.0);
 
       turningConfig
           .inverted(ModuleConstants.kTurningMotorsInverted)
