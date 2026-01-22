@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.spark.FeedbackSensor;
@@ -22,7 +23,6 @@ public final class Configs {
 
     static {
       // Use module constants to calculate conversion factors and feed forward gain.
-      double drivingFactor = ModuleConstants.kDrivingMotorReduction;
       double turningFactor = 1 / ModuleConstants.kTurningMotorReduction;
       double nominalVoltage = 12.0;
       double drivingVelocityFeedForward = nominalVoltage / ModuleConstants.kDriveWheelFreeSpeedRps;
