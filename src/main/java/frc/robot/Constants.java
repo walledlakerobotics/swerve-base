@@ -103,7 +103,7 @@ public final class Constants {
 
     public static final double kDrivingMotorReduction = 6.75;
     public static final double kDriveWheelFreeSpeedRps =
-        (NeoMotorConstants.kFreeSpeedRps * kWheelCircumferenceMeters) / kDrivingMotorReduction;
+        (KrakenX60MotorConstants.kFreeSpeedRps * kWheelCircumferenceMeters) / kDrivingMotorReduction;
 
     public static final double kTurningMotorReduction = 150.0 / 7;
 
@@ -137,6 +137,11 @@ public final class Constants {
 
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
+    public static final double kFreeSpeedRps = kFreeSpeedRpm / 60;
+  }
+
+  public static final class KrakenX60MotorConstants {
+    public static final double kFreeSpeedRpm = 6000;
     public static final double kFreeSpeedRps = kFreeSpeedRpm / 60;
   }
 
