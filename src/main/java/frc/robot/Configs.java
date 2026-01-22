@@ -39,7 +39,10 @@ public final class Configs {
               new CurrentLimitsConfigs()
                   .withSupplyCurrentLimit(ModuleConstants.kDrivingMotorSupplyLimit)
                   .withStatorCurrentLimit(ModuleConstants.kDrivingMotorStatorLimit))
-          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(drivingFactor))
+          .withFeedback(
+              new FeedbackConfigs()
+                  .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
+                  .withSensorToMechanismRatio(ModuleConstants.kDrivingMotorReduction))
           .withSlot0(
               new Slot0Configs()
                   .withKP(0.04)
