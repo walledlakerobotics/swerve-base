@@ -11,7 +11,6 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import frc.robot.Constants.KrakenX60MotorConstants;
 import frc.robot.Constants.ModuleConstants;
 
 /** Contains configuration objects for various robot components. */
