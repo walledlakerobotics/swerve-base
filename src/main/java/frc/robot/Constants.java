@@ -99,7 +99,7 @@ public final class Constants {
     public static final double kWheelCircumferenceMeters = kWheelDiameterMeters * Math.PI;
 
     public static final double kDrivingMotorReduction = 6.75;
-    public static final double kDriveWheelFreeSpeedRps =
+    public static final double kDriveFreeSpeedMetersPerSecond =
         (NeoMotorConstants.kFreeSpeedRps * kWheelCircumferenceMeters) / kDrivingMotorReduction;
 
     public static final double kTurningMotorReduction = 150.0 / 7;

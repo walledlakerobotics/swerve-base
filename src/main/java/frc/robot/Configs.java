@@ -20,7 +20,8 @@ public final class Configs {
           ModuleConstants.kWheelDiameterMeters * Math.PI / ModuleConstants.kDrivingMotorReduction;
       double turningFactor = 1.0 / ModuleConstants.kTurningMotorReduction;
       double nominalVoltage = 12.0;
-      double drivingVelocityFeedForward = nominalVoltage / ModuleConstants.kDriveWheelFreeSpeedRps;
+      double drivingVelocityFeedForward =
+          nominalVoltage / ModuleConstants.kDriveFreeSpeedMetersPerSecond;
 
       drivingConfig
           .inverted(ModuleConstants.kDrivingMotorsInverted)
