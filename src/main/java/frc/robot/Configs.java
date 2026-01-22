@@ -26,10 +26,7 @@ public final class Configs {
       // Use module constants to calculate conversion factors and feed forward gain.
       double turningFactor = 1 / ModuleConstants.kTurningMotorReduction;
       double nominalVoltage = 12.0;
-      double drivingVelocityFeedForward =
-          nominalVoltage
-              * ModuleConstants.kDrivingMotorReduction
-              / KrakenX60MotorConstants.kFreeSpeedRps;
+      double drivingVelocityFeedForward = nominalVoltage / ModuleConstants.kDriveWheelFreeSpeedRps;
 
       drivingConfig
           .withMotorOutput(
